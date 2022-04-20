@@ -1,6 +1,10 @@
 const defaultTheme = require('tailwindcss/defaultTheme');
 
 module.exports = {
+    mode: 'jit',
+    purge: [
+        './vendor/rappasoft/laravel-livewire-tables/resources/views/tailwind/**/*.blade.php',
+    ],
     content: [
         './vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php',
         './vendor/laravel/jetstream/**/*.blade.php',
