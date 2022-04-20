@@ -58,16 +58,16 @@
         },
         {
             "name": "aws/aws-sdk-php",
-            "version": "3.220.0",
+            "version": "3.220.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aws/aws-sdk-php.git",
-                "reference": "8beb098a2224742b2756e3b40a07593b1e6ff967"
+                "reference": "1436b69a1e2e8005cc867feb021455ab0a26a30f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/8beb098a2224742b2756e3b40a07593b1e6ff967",
-                "reference": "8beb098a2224742b2756e3b40a07593b1e6ff967",
+                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/1436b69a1e2e8005cc867feb021455ab0a26a30f",
+                "reference": "1436b69a1e2e8005cc867feb021455ab0a26a30f",
                 "shasum": ""
             },
             "require": {
@@ -143,9 +143,9 @@
             "support": {
                 "forum": "https://forums.aws.amazon.com/forum.jspa?forumID=80",
                 "issues": "https://github.com/aws/aws-sdk-php/issues",
-                "source": "https://github.com/aws/aws-sdk-php/tree/3.220.0"
+                "source": "https://github.com/aws/aws-sdk-php/tree/3.220.1"
             },
-            "time": "2022-04-19T18:17:15+00:00"
+            "time": "2022-04-20T18:15:52+00:00"
         },
         {
             "name": "bacon/bacon-qr-code",
@@ -4333,16 +4333,16 @@
         },
         {
             "name": "power-components/livewire-powergrid",
-            "version": "v2.4.5",
+            "version": "v2.4.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Power-Components/livewire-powergrid.git",
-                "reference": "386bfa7cebeb0f8592e43f6ca709407a9a63b036"
+                "reference": "7d42b54566c99bd51a757c11aa3b66174683547a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Power-Components/livewire-powergrid/zipball/386bfa7cebeb0f8592e43f6ca709407a9a63b036",
-                "reference": "386bfa7cebeb0f8592e43f6ca709407a9a63b036",
+                "url": "https://api.github.com/repos/Power-Components/livewire-powergrid/zipball/7d42b54566c99bd51a757c11aa3b66174683547a",
+                "reference": "7d42b54566c99bd51a757c11aa3b66174683547a",
                 "shasum": ""
             },
             "require": {
@@ -4392,9 +4392,9 @@
             "homepage": "https://github.com/power-components/livewire-powergrid",
             "support": {
                 "issues": "https://github.com/Power-Components/livewire-powergrid/issues",
-                "source": "https://github.com/Power-Components/livewire-powergrid/tree/v2.4.5"
+                "source": "https://github.com/Power-Components/livewire-powergrid/tree/v2.4.6"
             },
-            "time": "2022-04-11T22:43:06+00:00"
+            "time": "2022-04-20T00:33:53+00:00"
         },
         {
             "name": "pragmarx/google2fa",
