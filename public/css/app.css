@@ -1550,11 +1550,11 @@ select {
 .border-l-0 {
   border-left-width: 0px;
 }
-.border-r {
-  border-right-width: 1px;
-}
 .border-l {
   border-left-width: 1px;
+}
+.border-r {
+  border-right-width: 1px;
 }
 .border-t-2 {
   border-top-width: 2px;
@@ -1581,10 +1581,6 @@ select {
   --tw-border-opacity: 1;
   border-color: rgb(243 244 246 / var(--tw-border-opacity));
 }
-.border-gray-400 {
-  --tw-border-opacity: 1;
-  border-color: rgb(156 163 175 / var(--tw-border-opacity));
-}
 .border-green-600 {
   --tw-border-opacity: 1;
   border-color: rgb(22 163 74 / var(--tw-border-opacity));
@@ -1596,6 +1592,10 @@ select {
 .border-gray-600 {
   --tw-border-opacity: 1;
   border-color: rgb(75 85 99 / var(--tw-border-opacity));
+}
+.border-gray-400 {
+  --tw-border-opacity: 1;
+  border-color: rgb(156 163 175 / var(--tw-border-opacity));
 }
 .border-blue-400 {
   --tw-border-opacity: 1;
