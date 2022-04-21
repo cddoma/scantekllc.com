@@ -60,4 +60,10 @@ class User extends Authenticatable implements Auditable
     protected $appends = [
         'profile_photo_url',
     ];
+
+    public function getTeamRole()
+    {
+        return $this->teamRole($this->currentTeam());
+    }
+
 }

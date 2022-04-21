@@ -9,14 +9,14 @@ use Illuminate\Database\Eloquent\Builder;
 use App\Models\User;
 use App\Models\Team;
 
-class UserTable extends DataTableComponent
+class TeamTable extends DataTableComponent
 {
-    protected $model = User::class;
+    protected $model = Team::class;
 
     public function configure(): void
     {
-        $this->setPageName('users');
-        $this->setEmptyMessage('No Users found');
+        $this->setPageName('accounts');
+        $this->setEmptyMessage('No Accounts found');
         // $this->setPaginationStatus(true);
         // $this->setPerPage(10);
         $this->setFilterPillsEnabled();
@@ -24,7 +24,7 @@ class UserTable extends DataTableComponent
         $this->setFilterLayoutSlideDown();
         $this->setPrimaryKey('id')
             ->setTableRowUrl(function($row) {
-                return route('profile.show', $row);
+                return route('accounts.show', $row);
             });
     }
 
@@ -43,11 +43,12 @@ class UserTable extends DataTableComponent
 
     public function builder(): Builder
     {
-        return User::query()
-            ->when($this->getAppliedFilterWithValue('Account'), fn($query, $team) => $query->where('current_team_id', '=', $team))
-            ->when($this->getAppliedFilterWithValue('Super Admin'), fn($query, $super_admin) => $query->where('super_admin', $super_admin));
+        return Team::query()
+        //    ->when($this->getAppliedFilterWithValue('Super Admin'), fn($query, $super_admin) => $query->where('super_admin', $super_admin))
+            ;
     }
 
+/*
     public function getTeams(): array
     {
         $teams = [];
@@ -76,6 +77,7 @@ class UserTable extends DataTableComponent
                 }),
         ];
     }
+*/
 
     public function columns(): array
     {
@@ -84,17 +86,10 @@ class UserTable extends DataTableComponent
                 ->sortable()
                 ->searchable()
                 ->collapseOnMobile(),
-            Column::make("Super Admin", "super_admin")
-                ->sortable()
-                ->collapseOnMobile(),
             Column::make("Name", "name")
                 ->sortable()
                 ->searchable(),
-            Column::make("Email", "email")
-                ->sortable()
-                ->searchable()
-                ->collapseOnMobile(),
-            Column::make("Account", "currentTeam.name")
+            Column::make("Owner", "owner.name")
                 ->sortable()
                 ->searchable(),
             Column::make("Created at", "created_at")
