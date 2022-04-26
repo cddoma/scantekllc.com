@@ -1,16 +1,16 @@
 <x-jet-form-section submit="updateTeamName">
     <x-slot name="title">
-        {{ __('Account Name') }}
+        {{ __('Shop Name') }}
     </x-slot>
 
     <x-slot name="description">
-        {{ __('The account\'s name and owner information.') }}
+        {{ __('The account\'s information.') }}
     </x-slot>
 
     <x-slot name="form">
         <!-- Team Name -->
         <div class="col-span-6 sm:col-span-4">
-            <x-jet-label for="name" value="{{ __('Account Name') }}" />
+            <x-jet-label for="name" value="{{ __('Shop Name') }}" />
 
             <x-jet-input id="name"
                         type="text"
