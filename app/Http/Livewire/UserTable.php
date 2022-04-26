@@ -39,6 +39,17 @@ class UserTable extends DataTableComponent
             
         }
     }
+
+    public function getYears($start = 2000): array
+    {
+        $years = [];
+        $vpic = new BiegalskiLLC\NHTSAVehicleAPI\VehicleApi();
+        foreach($vpic->listYears($start) as $year) {
+            $years[$year] = $year;
+        }
+        return $years;
+    }
+
 */
 
     public function builder(): Builder

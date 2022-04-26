@@ -22,11 +22,11 @@
         </div> -->
 
         <div class="col-span-6 sm:col-span-4">
-            <x-jet-label for="name" value="{{ __('Account Name') }}" />
+            <x-jet-label for="name" value="{{ __('Shop') }}" />
             <x-jet-input id="name" type="text" class="mt-1 block w-full" wire:model.defer="state.name" autofocus />
             <x-jet-input-error for="name" class="mt-2" />
         </div>
-        <div class="col-span-6 sm:col-span-4">
+        <!-- <div class="col-span-6 sm:col-span-4">
             <x-jet-label for="owner" value="{{ __('Account Owner Name') }}" />
             <x-jet-input id="owner" type="text" class="mt-1 block w-full" wire:model.defer="state.owner" autofocus />
             <x-jet-input-error for="owner" class="mt-2" />
@@ -35,7 +35,7 @@
             <x-jet-label for="email" value="{{ __('Account Owner Email') }}" />
             <x-jet-input id="email" type="text" class="mt-1 block w-full" wire:model.defer="state.email" autofocus />
             <x-jet-input-error for="email" class="mt-2" />
-        </div>
+        </div> -->
     </x-slot>
 
     <x-slot name="actions">

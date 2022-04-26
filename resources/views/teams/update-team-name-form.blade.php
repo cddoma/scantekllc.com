@@ -22,7 +22,7 @@
         </div>
 
         <!-- Team Owner -->
-        <div class="col-span-6 sm:col-span-4">
+        <!-- <div class="col-span-6 sm:col-span-4">
             <x-jet-label for="owner" value="{{ __('Account Owner') }}" />
 
             <x-jet-input
@@ -35,7 +35,7 @@
                         class="mt-1 block w-full"
                         value="{{ $team->owner->email }}"
                         disabled="disabled" />
-        </div>
+        </div> -->
     </x-slot>
 
     @if (Gate::check('update', $team))

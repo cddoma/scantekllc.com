@@ -28,28 +28,28 @@ class CreateTeam implements CreatesTeams
 
         Validator::make($input, [
             'name' => ['required', 'string', 'max:255'],
-            'owner' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email'],
+            // 'owner' => ['required', 'string', 'max:255'],
+            // 'email' => ['required', 'email'],
         ])->validateWithBag('createTeam');
 
         AddingTeam::dispatch($user);
 
-        $new_user = User::firstOrCreate(
-            ['email' => $input['email']],
-            [
-                'name' => $input['owner'],
-                'password' => Hash::make('password1')//Hash::make(Str::random(32)),
-            ]
-        );
+        // $new_user = User::firstOrCreate(
+        //     ['email' => $input['email']],
+        //     [
+        //         'name' => $input['owner'],
+        //         'password' => Hash::make('password1')//Hash::make(Str::random(32)),
+        //     ]
+        // );
 
         $team = Team::create([
             'name' => $input['name'],
-            'user_id' => $new_user->id,
+            'user_id' => $user->id,
             'personal_team' => false,
         ]);
-        Password::sendResetLink(['email' => $new_user->email]);
+        // Password::sendResetLink(['email' => $new_user->email]);
 
-        $new_user->switchTeam($team);
+        $user->switchTeam($team);
 
         return $team;
     }
