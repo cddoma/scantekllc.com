@@ -13,10 +13,13 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('ros', function (Blueprint $table) {
+        Schema::create('repair_order_products', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('team_id');
-            $table->foreignId('vehicle_id')->nullable();
+            $table->unsignedBigInteger('repair_order_id')->index();
+            $table->unsignedBigInteger('product_id')->index();
+            $table->float('price', 8, 2)->nullable()->default(null);
+            $table->tinyText('name')->nullable()->default(null);
+            $table->text('notes')->nullable()->default(null);
             $table->timestamps();
         });
     }
@@ -28,6 +31,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('ros');
+        Schema::dropIfExists('repair_order_products');
     }
 };

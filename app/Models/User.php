@@ -21,6 +21,7 @@ class User extends Authenticatable implements Auditable
     use Notifiable;
     use TwoFactorAuthenticatable;
     use \OwenIt\Auditing\Auditable;
+    use \Lab404\Impersonate\Models\Impersonate;
 
     /**
      * The attributes that are mass assignable.
@@ -66,4 +67,23 @@ class User extends Authenticatable implements Auditable
         return $this->teamRole($this->currentTeam());
     }
 
+    public function session()
+    {
+        return $this->hasOne(UserSession::class)
+                ->ofMany([
+                'sessions.last_activity' => 'max',
+            ], function ($query) {
+                $query->where('sessions.user_id', $this->id)->orderBy('sessions.last_activity', 'desc');
+            })->orderBy('sessions.last_activity', 'desc');
+    }
+
+    public function canImpersonate()
+    {
+        return boolval($this->super_admin);
+    }
+
+    public function canBeImpersonated()
+    {
+        return !boolval($this->super_admin);
+    }
 }

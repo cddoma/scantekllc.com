@@ -15,46 +15,22 @@
                     <x-jet-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('dashboard')">
                         {{ __('Dashboard') }}
                     </x-jet-nav-link>
+                    <x-jet-nav-link href="{{ route('ro.index') }}" :active="request()->routeIs('ro.index')">
+                        {{ __('Repair Orders') }}
+                    </x-jet-nav-link>
+                    @if (boolval(Auth::user()->super_admin))
+                        <x-jet-nav-link href="{{ route('accounts.index') }}" :active="request()->routeIs('accounts.index')">
+                            {{ __('Shops') }}
+                        </x-jet-nav-link>
+                        <x-jet-nav-link href="{{ route('users.index') }}" :active="request()->routeIs('users.index')">
+                            {{ __('Users') }}
+                        </x-jet-nav-link>
+                    @endif
                 </div>
             </div>
 
             <div class="hidden sm:flex sm:items-center sm:ml-6">
-                <!-- Super Admin Dropdown -->
-                @if (boolval(Auth::user()->super_admin))
-                    <div class="ml-3 relative">
-                        <x-jet-dropdown align="right" width="60">
-                            <x-slot name="trigger">
-                                <span class="inline-flex rounded-md">
-                                    <button type="button" class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:bg-gray-50 hover:text-gray-700 focus:outline-none focus:bg-gray-50 active:bg-gray-50 transition">
-                                        {{ __('Admin') }}
-
-                                        <svg class="ml-2 -mr-0.5 h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                                            <path fill-rule="evenodd" d="M10 3a1 1 0 01.707.293l3 3a1 1 0 01-1.414 1.414L10 5.414 7.707 7.707a1 1 0 01-1.414-1.414l3-3A1 1 0 0110 3zm-3.707 9.293a1 1 0 011.414 0L10 14.586l2.293-2.293a1 1 0 011.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" />
-                                        </svg>
-                                    </button>
-                                </span>
-                            </x-slot>
-                            <x-slot name="content">
-                                <div class="w-60">
-                                    <!-- Super Admin -->
-                                    <div class="block px-4 py-2 text-xs text-gray-400">
-                                        {{ __('Admin') }}
-                                    </div>
-                                    <x-jet-dropdown-link href="{{ route('accounts.index') }}">
-                                        {{ __('Accounts') }}
-                                    </x-jet-dropdown-link>
-                                    <x-jet-dropdown-link href="{{ route('users.index') }}">
-                                        {{ __('Users') }}
-                                    </x-jet-dropdown-link>
-                                    <x-jet-dropdown-link href="#">
-                                        {{ __('Repair Orders') }}
-                                    </x-jet-dropdown-link>
-                                </div>
-                            </x-slot>
-                        </x-jet-dropdown>
-                    </div>
-                @endif
-                @if (count(Auth::user()->allTeams()) > 0)
+                @if (count(Auth::user()->allTeams()) > 0 && !boolval(Auth::user()->super_admin))
                 <!-- Teams Dropdown -->
                 @if (Laravel\Jetstream\Jetstream::hasTeamFeatures())
                     <div class="ml-3 relative">
@@ -173,15 +149,15 @@
             <x-jet-responsive-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('dashboard')">
                 {{ __('Dashboard') }}
             </x-jet-responsive-nav-link>
+            <x-jet-responsive-nav-link href="{{ route('ro.index') }}" :active="request()->routeIs('ro.index')">
+                {{ __('Repair Orders') }}
+            </x-jet-responsive-nav-link>
             @if (boolval(Auth::user()->super_admin))
-                <x-jet-responsive-nav-link href="{{ route('accounts.index') }}">
-                    {{ __('Accounts') }}
+                <x-jet-responsive-nav-link href="{{ route('accounts.index') }}" :active="request()->routeIs('accounts.index')">
+                    {{ __('Shops') }}
                 </x-jet-responsive-nav-link>
-                <x-jet-responsive-nav-link href="{{ route('users.index') }}">
+                <x-jet-responsive-nav-link href="{{ route('users.index') }}" :active="request()->routeIs('users.index')">
                     {{ __('Users') }}
-                </x-jet-responsive-nav-link>
-                <x-jet-responsive-nav-link href="#">
-                    {{ __('Repair Orders') }}
                 </x-jet-responsive-nav-link>
             @endif
         </div>
@@ -224,7 +200,7 @@
                     </x-jet-responsive-nav-link>
                 </form>
 
-                @if (count(Auth::user()->allTeams()) > 0)
+                @if (count(Auth::user()->allTeams()) > 0 && !boolval(Auth::user()->super_admin))
                 <!-- Team Management -->
                 @if (Laravel\Jetstream\Jetstream::hasTeamFeatures())
                     <div class="border-t border-gray-200"></div>

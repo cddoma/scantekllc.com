@@ -7,26 +7,24 @@ use Rappasoft\LaravelLivewireTables\Views\Column;
 use Rappasoft\LaravelLivewireTables\Views\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Builder;
 use App\Models\User;
-use App\Models\Team;
+use App\Models\RepairOrder as RO;
 
-class TeamTable extends DataTableComponent
+class ROTable extends DataTableComponent
 {
-    protected $model = Team::class;
+    protected $model = RO::class;
 
     public function configure(): void
     {
-        $this->setPageName('Shops');
-        $this->setEmptyMessage('No Shops found');
-        $this->setPaginationEnabled();
-        $this->setPerPageVisibilityEnabled();
-        $this->setPerPageAccepted([10, 25, 50, 100]);
-        $this->setPerPage(100);
+        $this->setPageName('Repair Orders');
+        $this->setEmptyMessage('No Repair Orders found');
+        // $this->setPaginationStatus(true);
+        // $this->setPerPage(10);
         $this->setFilterPillsEnabled();
         // $this->setFilterLayoutPopover();
         $this->setFilterLayoutSlideDown();
         $this->setPrimaryKey('id')
             ->setTableRowUrl(function($row) {
-                return route('accounts.show', $row);
+                return route('ro.show', $row);
             });
     }
 
@@ -45,7 +43,10 @@ class TeamTable extends DataTableComponent
 
     public function builder(): Builder
     {
-        return Team::query()
+        if(boolval(\Auth::user()->super_admin)) {
+            return RO::query();
+        }
+        return RO::where('team_id', \Auth::user()->current_team_id);
         //    ->when($this->getAppliedFilterWithValue('Super Admin'), fn($query, $super_admin) => $query->where('super_admin', $super_admin))
             ;
     }
@@ -87,22 +88,22 @@ class TeamTable extends DataTableComponent
             Column::make("Id", "id")
                 ->sortable()
                 ->searchable()
-                ->collapseOnMobile()
-                ->deselected(),
-            Column::make("Name", "name")
+                ->collapseOnMobile(),
+            Column::make("Status", "status")
                 ->sortable()
                 ->searchable(),
-            Column::make("Repair Orders", "user_id")
+            Column::make("Priority", "priority")
                 ->sortable()
                 ->searchable(),
+            // Column::make("Owner", "owner.name")
+            //     ->sortable()
+            //     ->searchable(),
             Column::make("Created at", "created_at")
                 ->sortable()
-                ->collapseOnMobile()
-                ->deselected(),
+                ->collapseOnMobile(),
             Column::make("Updated at", "updated_at")
                 ->sortable()
-                ->collapseOnMobile()
-                ->deselected(),
+                ->collapseOnMobile(),
         ];
     }
 }
