@@ -28,7 +28,11 @@ Route::middleware([
 
     Route::get('/ro', function () { return view('ro.index'); })->name('ro.index');
     Route::get('/ro/{id}', function () { return view('ro.show'); })->name('ro.show');
-    Route::get('/ro/create', function () { return view('ro.create'); })->name('ro.create');
+    Route::get('/ro/create/{vehicleId}', function ($vehicleId) { return view('ro.show', ['vehicleId' => $vehicleId]); })->name('ro.create');
+
+    Route::get('/vehicles', function () { return view('vehicles.index'); })->name('vehicles.index');
+    Route::get('/vehicle/create', function () { return view('vehicles.show'); })->name('vehicles.create');
+    Route::get('/vehicle/{id}', function ($id) { return view('vehicles.show', ['vehicleId' => $id]); })->name('vehicles.show');
 });
 
 Route::middleware([

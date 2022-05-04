@@ -14,4 +14,9 @@ class Vehicle extends Model implements Auditable
     protected $fillable = [
         'name', 'vin', 'year', 'make', 'model', 'trim', 'team_id', 'vpic_model_id', 'vpic_make_id'
     ];
+
+    public function team()
+    {
+        return $this->belongsTo(Team::class);
+    }
 }

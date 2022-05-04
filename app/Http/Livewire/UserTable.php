@@ -21,6 +21,7 @@ class UserTable extends DataTableComponent
 
     public function configure(): void
     {
+        // $this->setReorderEnabled();
         $this->setPageName('Users');
         $this->setEmptyMessage('No Users found');
         $this->setPaginationEnabled();
@@ -159,7 +160,7 @@ class UserTable extends DataTableComponent
                     (!empty($value) ? 
                         Carbon::createFromTimestamp($value)->subHours(4)->toDateTimeString() . '  ' .
                         ( $this->getAgent($row->user_agent)->isDesktop($row->user_agent) ? 
-                        '<svg fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" stroke="currentColor" class="w-8 h-8 text-gray-500 inline mr-1">
+                        '<svg fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" stroke="currentColor" class="w-5 h-5 text-gray-500 inline mr-1">
                                     <path d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
                                 </svg>'
                                 : '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-gray-500 inline mr-1">
@@ -173,10 +174,11 @@ class UserTable extends DataTableComponent
                 )
                 ->html(),
             Column::make('Impersonate', 'session.user_id')
+                ->collapseOnMobile()
                 ->hideIf(!boolval(\Auth::user()->super_admin))
                 ->format(fn($value, $row, Column $column) =>  '
                 <a href="'.route('impersonate', $row->id).'" class="inline" title="Login as '.$row->name.'">
-                    <button type="button" class="inline-flex items-center px-4 py-2 bg-gray-900 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-100 active:bg-gray-900 focus:outline-none focus:border-gray-900 focus:ring focus:ring-gray-300 disabled:opacity-25 transition"><img class="h-5 w-5" src="/icon/mask.png" /></button>
+                    <button type="button" class="inline-flex items-center px-2 py-1 bg-gray-900 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-100 active:bg-gray-900 focus:outline-none focus:border-gray-900 focus:ring focus:ring-gray-300 disabled:opacity-25 transition"><img class="h-5 w-5" src="/icon/mask.png" /></button>
                 </a>')
                 ->html()
         ];
