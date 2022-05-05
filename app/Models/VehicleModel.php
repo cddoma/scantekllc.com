@@ -9,4 +9,9 @@ class VehicleModel extends Model
 {
     use HasFactory;
     public $timestamps = false;
+
+    public function make()
+    {
+        return $this->hasOne(VehicleMake::class, 'vpic_id', 'vpic_make_id');
+    }
 }

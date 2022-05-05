@@ -19,8 +19,8 @@ class VehicleModelYearSeeder extends Seeder
      */
     public function run()
     {
-        $startYear = intval(date("Y")) + 2;
-        for ($year=$startYear; $year > 2000; $year--) { 
+        $startYear = 2000;//intval(date("Y")) + 2;
+        for ($year=$startYear; $year >= 1990; $year--) { 
             $makes = VehicleMake::whereIn('vpic_id', function ($query) {
                 // $query->selectRaw('distinct(vpic_make_id)')->from('vehicle_make_types')->where('vpic_id', [2,3,7]);
                 $query->selectRaw('distinct(vpic_make_id)')->from('vehicle_make_types')->where('vpic_id', [1,5,6,9,10,13]);

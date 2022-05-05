@@ -26,6 +26,9 @@
                             {{ __('Users') }}
                         </x-jet-nav-link>
                     @endif
+                        <x-jet-nav-link href="{{ route('vehicles.makes') }}" :active="request()->routeIs('vehicles.makes')">
+                            {{ __('Supported Vehicles') }}
+                        </x-jet-nav-link>
                 </div>
             </div>
 

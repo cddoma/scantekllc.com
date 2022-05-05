@@ -33,6 +33,10 @@ Route::middleware([
     Route::get('/vehicles', function () { return view('vehicles.index'); })->name('vehicles.index');
     Route::get('/vehicle/create', function () { return view('vehicles.show'); })->name('vehicles.create');
     Route::get('/vehicle/{id}', function ($id) { return view('vehicles.show', ['vehicleId' => $id]); })->name('vehicles.show');
+
+    Route::get('/admin/makes', function () { return view('vehicles.makes'); })->name('vehicles.makes');
+    Route::get('/admin/models', function () { return view('vehicles.models'); })->name('vehicles.models');
+    Route::get('/admin/make/{id}/models', function ($id) { return view('vehicles.models', ['make_id' => $id]); })->name('vehicles.make.models');
 });
 
 Route::middleware([

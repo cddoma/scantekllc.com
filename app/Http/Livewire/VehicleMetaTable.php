@@ -35,7 +35,6 @@ class VehicleMetaTable extends DataTableComponent
         return VehicleMeta::query()
             ->where('vehicle_id', $this->vehicleId)
             ->select('key', 'value');
-            ;
     }
 
     public function columns(): array
