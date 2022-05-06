@@ -36,7 +36,8 @@ class Update extends Component
     public function mount($ro_id = '')
     {
         $this->ro = RO::findOrNew($ro_id)->withoutRelations()->toArray();
-        $this->vehicle = Vehicle::findOrNew($this->ro['vehicle_id']);
+        $vehicle_id = $this->ro['vehicle_id'] ?? 0;
+        $this->vehicle = Vehicle::findOrNew($vehicle_id);
         $this->state = $this->vehicle->withoutRelations()->toArray();
         // $this->team_id = $this->state['team_id'] ?? \Auth::user()->current_team_id;
         $this->search = $this->state['name'] ?? '';
