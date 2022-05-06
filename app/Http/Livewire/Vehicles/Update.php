@@ -4,10 +4,15 @@ namespace App\Http\Livewire\Vehicles;
 
 use Livewire\Component;
 use Livewire\WithFileUploads;
+use App\Models\Team;
+use App\Models\User;
 use App\Models\Vehicle;
 use App\Models\VehicleMeta;
 use App\Models\VehicleMake;
 use App\Models\VehicleModel;
+use App\Models\Product;
+use App\Models\RepairOrder as RO;
+use App\Models\RepairOrderProduct as ROProduct;
 use App\Jobs\GetVinData;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -21,6 +26,8 @@ class Update extends Component
     public $options = [];
     public $make;
     public $model;
+    public $search;
+    public $product_id;
 
     protected $listeners = ['updateVehicleIds' => 'updateVehicleIds', 'refresh' => '$refresh'];
 
@@ -28,13 +35,25 @@ class Update extends Component
     {
         $this->vehicle = Vehicle::findOrNew($vehicleId);
         $this->state = $this->vehicle->withoutRelations()->toArray();
-        $this->state['name'] = $this->state['name'] ?? '';
+        // $this->team_id = $this->state['team_id'] ?? \Auth::user()->current_team_id;
+        $this->search = $this->state['name'] ?? '';
+        $this->product = '';
     }
 
     public function render()
     {
-        $this->emit('updateVehicleOptions', $this->state['name']);
-        return view('vehicles.update-form');
+        if(!empty($this->state['name']) && $this->search !== $this->state['name']) {
+            $this->emit('updateVehicleOptions', $this->state['name']);
+        }
+        if(!empty($this->state['team_id']) && $this->state['team_id'] !== \Auth::user()->current_team_id ) {
+            $this->emit('updateAdjusterOptions', $this->state['team_id']);
+        }
+        $teams = Team::select('name', 'id')->get()->toArray();
+        $products = Product::where([['hidden', 0], ['active', 1]])->select('name', 'id')->get()->toArray();
+        return view('vehicles.update-form', [
+            'teams' => $teams,
+            'products' => $products
+        ]);
     }
 
     public function rules()
@@ -47,6 +66,18 @@ class Update extends Component
             'year' => "nullable|max:$max|digits:2|digits:4",
             'vin' => 'nullable|size:17',
         ];
+    }
+
+    public function updateProduct($product_id)
+    {
+        $this->product_id = $product_id;
+        $this->skipRender();
+    }
+
+    public function updateAdjuster($user_id)
+    {
+        $this->state['adjuster'] = $user_id;
+        $this->skipRender();
     }
 
     public function updateVehicleIds($year, $make_id, $model_id)
@@ -71,7 +102,7 @@ class Update extends Component
             }
             $this->vehicle = Vehicle::create(
                 [
-                    'team_id' => \Auth::user()->current_team_id,
+                    'team_id' => \Auth::user()->super_admin ? $this->state['team_id'] : \Auth::user()->current_team_id,
                     'name' => $this->state['name'] ?? null,
                     'year' => $this->state['year'] ?? null,
                     'make' => $make->name ?? null,
@@ -85,6 +116,21 @@ class Update extends Component
             $this->emit('saved');
             if(!empty($this->vehicle->vin)) {
                 $this->getVinData();
+            }
+            $ro = RO::create([
+                'team_id' => \Auth::user()->super_admin ? $this->state['team_id'] : \Auth::user()->current_team_id,
+                'created_by' => \Auth::user()->id,
+                'vehicle_id' => $this->vehicle->id,
+                // 'priority' => $this->state['priority'] ?? null,
+                // 'status' => $this->state['status'] ?? null,
+                'technician' => $this->state['technician'] ?? null,
+                'adjuster' => $this->state['adjuster'] ?? null,
+            ]);
+            if(!empty($this->product_id)) {
+                ROProduct::create([
+                    'repair_order_id' => $ro->id,
+                    'product_id' => $this->product_id
+                ]);
             }
 
             return redirect()->route('ro.create', ['vehicleId' => $this->vehicle->id]);

@@ -3,6 +3,7 @@
 namespace App\Http\Livewire\Vehicles;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
+use App\Models\Team;
 
 class SelectList extends Component
 {
@@ -22,7 +23,7 @@ class SelectList extends Component
         $model = '';
         $matches = [];
 
-        preg_match('/([0-2][0-9])([0-9][0-9])?( )?([a-z,A-Z,\-]+)?( )?([0-9,a-z,A-Z,\-]+)?( )?([0-9,a-z,A-Z,\-]+)?/', $this->searchTerm, $matches);
+        preg_match('/([0-2][0-9])([0-9][0-9])?( )?([a-z,A-Z,\-,&,\',\.,0-9]+)?( )?([0-9,a-z,A-Z,\-,\',\.,0-9]+)?( )?([0-9,a-z,A-Z,\-,&,\',\.,0-9]+)?/', $this->searchTerm, $matches);
 
         if(!empty($matches[1])) {
             // first 2 digits of year
@@ -58,19 +59,12 @@ class SelectList extends Component
             // get options
             if(!empty($year)) {
                 if(!empty($make)) {
-                    if($this->makeExists($make)) {
+                    if($make_id = $this->makeExists($make)) {
                         // get models
-                        $this->options = $this->getVehicleModels($year, $make, trim($model));
+                        $this->options = $this->getVehicleModels($year, $make_id, trim($model));
                     } else {
                         // get makes
                         $this->options = $this->getVehicleMakes($year, $make);
-                        // $defaultOptions = $this->getVehicleMakesShortlist($year, $make);
-                        // if(count($defaultOptions) < 1) {
-                        // } else {
-                        //     $this->options = $defaultOptions;
-                        // }
-                        //$this->options = array_map(function($value) use ($year, $make) { if(str_starts_with($value, $make)){return $year . ' ' . $value; }}, $this->getVehicleMakesShortlist());
-                        // array_map(function($value) use ($year, $make) { if(str_starts_with($value, $make)){return $year . ' ' . $value; }}, $this->getVehicleMakesShortlist());
                     } 
                 } else {
                     // default makes
@@ -155,15 +149,15 @@ class SelectList extends Component
     {
         $return = [];
         foreach( DB::table('vehicle_makes')
-            ->join('vehicle_model_years', 'vehicle_makes.vpic_id', '=', 'vehicle_model_years.vpic_make_id')
-            ->join('vehicle_make_types', 'vehicle_makes.vpic_id', '=', 'vehicle_make_types.vpic_make_id')
-            ->whereIn('vehicle_make_types.vpic_id', [2,3,5,7])
+            // ->join('vehicle_model_years', 'vehicle_makes.vpic_id', '=', 'vehicle_model_years.vpic_make_id')
+            // ->join('vehicle_make_types', 'vehicle_makes.vpic_id', '=', 'vehicle_make_types.vpic_make_id')
+            // ->whereIn('vehicle_make_types.vpic_id', [2,3,5,7])
             ->where([
-                ['vehicle_model_years.year', $year],
+                // ['vehicle_model_years.year', $year],
                 ['vehicle_makes.name', 'LIKE', "{$make}%"],
             ])
-            ->groupBy('vehicle_makes.id')
-            ->orderBy('vehicle_makes.vpic_id')
+            ->groupBy('vehicle_makes.vpic_id')
+            ->orderBy('vehicle_makes.name')
             ->select('vehicle_makes.vpic_id as make_id', 'vehicle_makes.name as make')
             ->get()
             as $row 
@@ -178,18 +172,18 @@ class SelectList extends Component
         return $return;
     }
 
-    private function getVehicleModels($year, $make, $model = '')
+    private function getVehicleModels($year, $make_id, $model = '')
     {
         $return = [];
         $count = 0;
         $models = DB::table('vehicle_models')
             ->join('vehicle_makes', 'vehicle_models.vpic_make_id', '=', 'vehicle_makes.vpic_id')
-            ->join('vehicle_model_years', 'vehicle_makes.vpic_id', '=', 'vehicle_model_years.vpic_make_id')
-            ->join('vehicle_make_types', 'vehicle_makes.vpic_id', '=', 'vehicle_make_types.vpic_make_id')
-            ->whereIn('vehicle_make_types.vpic_id', [2,3,5,7])
+            // ->join('vehicle_model_years', 'vehicle_makes.vpic_id', '=', 'vehicle_model_years.vpic_make_id')
+            // ->join('vehicle_make_types', 'vehicle_makes.vpic_id', '=', 'vehicle_make_types.vpic_make_id')
+            // ->whereIn('vehicle_make_types.vpic_id', [2,3,5,7])
             ->where([
-                ['vehicle_model_years.year', $year],
-                ['vehicle_makes.name', 'LIKE', "{$make}%"],
+                // ['vehicle_model_years.year', $year],
+                ['vehicle_makes.vpic_id', '=', $make_id],
                 ['vehicle_models.name', 'LIKE', "{$model}%"],
             ])
             ->groupBy('vehicle_models.id')
@@ -198,13 +192,13 @@ class SelectList extends Component
         $count = count($models);
         foreach( $models as $row ) {
             $vehicleMake = [];
-            $vehicleMake['make_id'] = $row->make_id;
+            $vehicleMake['make_id'] = $make_id;
             $vehicleMake['model_id'] = $row->model_id;
             $vehicleMake['year'] = $year;
             $vehicleMake['value'] = $year . ' ' . strtoupper($row->make) . ' ' . strtoupper($row->model);
             $return[] = $vehicleMake;
             if($count == 1) {
-                $this->emit('updateVehicleIds', $year, $row->make_id, $row->model_id);
+                $this->emit('updateVehicleIds', $year, $make_id, $row->model_id);
             }
         }
         return $return;
@@ -213,11 +207,12 @@ class SelectList extends Component
     public function makeExists($make)
     {
         return DB::table('vehicle_makes')
-            ->join('vehicle_make_types', 'vehicle_makes.vpic_id', '=', 'vehicle_make_types.vpic_make_id')
-            ->whereIn('vehicle_make_types.vpic_id', [2,3,5,7,10])
+            // ->join('vehicle_make_types', 'vehicle_makes.vpic_id', '=', 'vehicle_make_types.vpic_make_id')
+            // ->whereIn('vehicle_make_types.vpic_id', [2,3,5,7,10])
             ->where('vehicle_makes.name', $make)
-            ->groupBy('vehicle_makes.id')
-            ->select('vehicle_makes.name')
-            ->exists();
+            // ->groupBy('vehicle_makes.vpic_id')
+            ->select('vehicle_makes.vpic_id')
+            ->first()
+            ->vpic_id ?? false;
     }
 }

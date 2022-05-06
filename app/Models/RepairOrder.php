@@ -20,6 +20,7 @@ class RepairOrder extends Model implements Auditable
         'vehicle_id', 
         'priority', 
         'status', 
+        'adjuster', 
         'technician', 
         'user_notes', 
         'notes', 
@@ -28,6 +29,7 @@ class RepairOrder extends Model implements Auditable
     protected $casts = [
         'team_id' => 'integer',
         'created_by' => 'integer',
+        'adjuster' => 'integer',
         'vehicle_id' => 'integer',
     ];
 
