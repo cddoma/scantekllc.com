@@ -7,15 +7,15 @@
 
     <div>
         <div class="max-w-7xl mx-auto py-10 sm:px-6 lg:px-8">
-            @livewire('r-o.services', ['vehicleId' => $vehicleId])
-            <x-jet-section-border />
-            @livewire('r-o.update', ['vehicleId' => $vehicleId])
-            <x-jet-section-border />
-            @livewire('vehicles.update', ['vehicleId' => $vehicleId])
+            {{-- @livewire('r-o.services', ['ro_id' => $ro_id]) --}}
+            {{-- <x-jet-section-border /> --}}
+            {{-- @livewire('r-o.update', ['ro_id' => $ro_id]) --}}
+            {{-- <x-jet-section-border /> --}}
+            @livewire('vehicles.update', ['ro_id' => $ro_id])
             <x-jet-section-border />
             @livewire('r-o.vindata', ['vehicleId' => $vehicleId])
             <x-jet-section-border />
-            {{-- @livewire('r-o.delete-r-o') --}}
+            @livewire('r-o.delete-r-o')
 
             @if (\Auth::user()->super_admin)
             @endif

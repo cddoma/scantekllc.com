@@ -27,8 +27,10 @@ Route::middleware([
     Route::get('/user/{id}', function () { return view('users.show'); })->name('users.show');
 
     Route::get('/ro', function () { return view('ro.index'); })->name('ro.index');
-    Route::get('/ro/{id}', function () { return view('ro.show'); })->name('ro.show');
-    Route::get('/ro/create/{vehicleId}', function ($vehicleId) { return view('ro.show', ['vehicleId' => $vehicleId]); })->name('ro.create');
+    Route::get('/ro/{id}', function ($id) { 
+        $ro = \App\Models\RepairOrder::findOrFail($id);
+        return view('ro.show', ['ro_id' => $id, 'vehicleId' => $ro->vehicle_id]); })->name('ro.show');
+    Route::get('/ro/create', function () { return view('ro.show'); })->name('ro.create');
 
     Route::get('/vehicles', function () { return view('vehicles.index'); })->name('vehicles.index');
     Route::get('/vehicle/create', function () { return view('vehicles.show'); })->name('vehicles.create');

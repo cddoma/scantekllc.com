@@ -45,6 +45,11 @@ class RepairOrder extends Model implements Auditable
 
     public function vehicle()
     {
-        return $this->hasOne(Vehicle::class);
+        return $this->hasOne(Vehicle::class, 'id', 'vehicle_id');
+    }
+
+    public function createdBy()
+    {
+        return $this->hasOne(User::class, 'id', 'created_by');
     }
 }

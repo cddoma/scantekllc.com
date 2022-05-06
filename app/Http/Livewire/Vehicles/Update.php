@@ -22,18 +22,21 @@ use Illuminate\Support\Facades\Http;
 class Update extends Component
 {
     protected $vehicle;
+    public $ro;
     public $state = [];
     public $options = [];
     public $make;
     public $model;
     public $search;
     public $product_id;
+    public $adjuster_id;
 
     protected $listeners = ['updateVehicleIds' => 'updateVehicleIds', 'refresh' => '$refresh'];
 
-    public function mount($vehicleId = '')
+    public function mount($ro_id = '')
     {
-        $this->vehicle = Vehicle::findOrNew($vehicleId);
+        $this->ro = RO::findOrNew($ro_id)->withoutRelations()->toArray();
+        $this->vehicle = Vehicle::findOrNew($this->ro['vehicle_id']);
         $this->state = $this->vehicle->withoutRelations()->toArray();
         // $this->team_id = $this->state['team_id'] ?? \Auth::user()->current_team_id;
         $this->search = $this->state['name'] ?? '';
@@ -76,7 +79,7 @@ class Update extends Component
 
     public function updateAdjuster($user_id)
     {
-        $this->state['adjuster'] = $user_id;
+        $this->adjuster_id = $user_id;
         $this->skipRender();
     }
 
@@ -124,7 +127,8 @@ class Update extends Component
                 // 'priority' => $this->state['priority'] ?? null,
                 // 'status' => $this->state['status'] ?? null,
                 'technician' => $this->state['technician'] ?? null,
-                'adjuster' => $this->state['adjuster'] ?? null,
+                'adjuster' => $this->adjuster_id ?? null,
+                'ro' => $this->state['ro'] ?? null,
             ]);
             if(!empty($this->product_id)) {
                 ROProduct::create([
@@ -133,7 +137,7 @@ class Update extends Component
                 ]);
             }
 
-            return redirect()->route('ro.create', ['vehicleId' => $this->vehicle->id]);
+            return redirect()->route('ro.create', ['ro_id' => $ro->id]);
         } else {
             $this->vehicle = Vehicle::findOrFail($this->state['id']);
             $this->vehicle->name = $this->state['name'];

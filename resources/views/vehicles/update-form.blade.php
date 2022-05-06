@@ -53,7 +53,7 @@
             <x-jet-input id="ro"
                         type="text"
                         class="mt-1 block w-full"
-                        wire:model.defer="state.ro"
+                        wire:model.defer="ro.ro"
                         placeholder="RO#"
                         autofocus />
             <x-jet-input-error for="ro" class="mt-2" />
@@ -119,7 +119,7 @@
             <x-jet-input id="technician"
                         type="text"
                         class="mt-1 block w-full"
-                        wire:model.defer="state.technician"
+                        wire:model.defer="ro.technician"
                         placeholder="Technician" />
             <x-jet-input-error for="technician" class="mt-2" />
         </div>
