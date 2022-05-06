@@ -138,7 +138,7 @@ class Update extends Component
                 ]);
             }
 
-            return redirect()->route('ro.create', ['ro_id' => $ro->id]);
+            return redirect()->route('ro.index');
         } else {
             $this->vehicle = Vehicle::findOrFail($this->state['id']);
             $this->vehicle->name = $this->state['name'];
