@@ -104,22 +104,24 @@
                         list="productOptions"
                         class="mt-1 block w-full"
                         wire:model.defer="product"
+                        wire:keydown="updateProduct(document.getElementById('productOptions').options[0].getAttribute('data-value'));"
             />
 
             <datalist id="productOptions">
                 @if(!empty($products))
                     @foreach($products as $product)
-                        <option wire:click="updateProduct({{ $product['id'] }})" value="{{ $product['name'] }}"/>
+                        <option data-value="{{ $product['id'] }}">{{ $product['name'] }}</option>
                     @endforeach
                 @endif
             </datalist>
+            <input type="hidden" id="product_id" wire:model="state.product_id" />
         </div>
         <div class="col-span-6 sm:col-span-4">
             <x-jet-label for="technician" value="{{ __('Technician') }}" />
             <x-jet-input id="technician"
                         type="text"
                         class="mt-1 block w-full"
-                        wire:model.defer="ro.technician"
+                        wire:model.defer="state.technician"
                         placeholder="Technician" />
             <x-jet-input-error for="technician" class="mt-2" />
         </div>
@@ -127,6 +129,7 @@
             <x-jet-label for="adjuster" value="{{ __('Adjuster') }}" />
             <x-jet-input id="adjuster"
                         name="adjuster"
+                        wire:model.defer="state.adjuster"
                         placeholder="Adjuster"
                         type="text"
                         list="adjusterOptions"

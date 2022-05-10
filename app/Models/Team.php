@@ -44,4 +44,14 @@ class Team extends JetstreamTeam implements Auditable
         'updated' => TeamUpdated::class,
         'deleted' => TeamDeleted::class,
     ];
+
+    public function roCount()
+    {
+        return $this->hasMany(RepairOrder::class)->count();
+    }
+
+    public function userCount()
+    {
+        return $this->hasMany(User::class, 'current_team_id')->count();
+    }
 }

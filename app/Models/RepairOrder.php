@@ -38,9 +38,9 @@ class RepairOrder extends Model implements Auditable
         return $this->belongsTo(Team::class);
     }
 
-    public function products()
+    public function allProducts()
     {
-        return $this->hasMany(RepairOrderProduct::class);
+        return $this->hasManyThrough(Product::class, RepairOrderProduct::class);
     }
 
     public function vehicle()

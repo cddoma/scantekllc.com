@@ -74,14 +74,12 @@ class Update extends Component
 
     public function updateProduct($product_id)
     {
-        $this->product_id = $product_id;
-        $this->skipRender();
+        $this->state['product_id'] = $product_id;
     }
 
     public function updateAdjuster($user_id)
     {
-        $this->adjuster_id = $user_id;
-        $this->skipRender();
+        $this->state['adjuster'] = $product_id;
     }
 
     public function updateVehicleIds($year, $make_id, $model_id)
@@ -128,13 +126,13 @@ class Update extends Component
                 // 'priority' => $this->state['priority'] ?? null,
                 // 'status' => $this->state['status'] ?? null,
                 'technician' => $this->state['technician'] ?? null,
-                'adjuster' => $this->adjuster_id ?? null,
+                'adjuster' => $this->state['adjuster'] ?? null,
                 'ro' => $this->state['ro'] ?? null,
             ]);
-            if(!empty($this->product_id)) {
+            if(!empty($this->state['product_id'])) {
                 ROProduct::create([
                     'repair_order_id' => $ro->id,
-                    'product_id' => $this->product_id
+                    'product_id' => $this->state['product_id']
                 ]);
             }
 

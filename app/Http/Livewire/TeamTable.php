@@ -46,6 +46,9 @@ class TeamTable extends DataTableComponent
     public function builder(): Builder
     {
         return Team::query()
+            // ->leftJoin('repair_orders', 'teams.id', '=', 'repair_orders.team_id')
+            // ->groupBy('teams.id')
+            // ->selectRaw('COUNT(repair_orders.id) AS ros')
         //    ->when($this->getAppliedFilterWithValue('Super Admin'), fn($query, $super_admin) => $query->where('super_admin', $super_admin))
             ;
     }
@@ -88,21 +91,24 @@ class TeamTable extends DataTableComponent
                 ->sortable()
                 ->searchable()
                 ->collapseOnMobile()
-                ->deselected(),
+                ->deSelected(),
             Column::make("Name", "name")
                 ->sortable()
                 ->searchable(),
-            Column::make("Repair Orders", "user_id")
-                ->sortable()
-                ->searchable(),
+            Column::make("ROs", 'user_id as 2')
+                //->sortable(),
+                ->format(fn($value, $row, Column $column) => $row->roCount()),
+            Column::make("Users", 'user_id')
+                //->sortable()
+                ->format(fn($value, $row, Column $column) => $row->userCount()),
             Column::make("Created at", "created_at")
                 ->sortable()
                 ->collapseOnMobile()
-                ->deselected(),
+                ->deSelected(),
             Column::make("Updated at", "updated_at")
                 ->sortable()
                 ->collapseOnMobile()
-                ->deselected(),
+                ->deSelected(),
         ];
     }
 }

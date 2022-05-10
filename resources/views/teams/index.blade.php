@@ -2,7 +2,7 @@
     <x-slot name="title">{{ __('Accounts') }}</x-slot>
 
     <div>
-        <a href="{{ route('accounts.create') }}"  class="inline float-right">
+        <a href="{{ route('accounts.create') }}"  class="inline float-right ml-1 mt-1 mr-3" style="line-height: 2.125em;">
             <x-jet-button type="button">
                 {{ __('New Shop') }}
             </x-jet-button>
