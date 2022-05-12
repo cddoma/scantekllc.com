@@ -21,7 +21,6 @@ class VehicleMakeTable extends DataTableComponent
     public function configure(): void
     {
         $this->setPrimaryKey('id');
-        $this->setPageName('Supported Makes');
         $this->setEmptyMessage('No Makes found');
         $this->setPerPageAccepted([10, 25, 50, 100]);
         $this->setPerPage(10);
@@ -103,11 +102,11 @@ class VehicleMakeTable extends DataTableComponent
             Column::make("make", "name")
                 ->sortable()
                 ->searchable(),
-            Column::make("Models", "id as 21")
+            Column::make("Models", "name as 21")
                 ->format(fn($value, $row, Column $column) => VehicleModel::where('vpic_make_id', $row->vpic_id)->count() ),
-            Column::make("Min Year", "id as 23")
+            Column::make("Min Year", "name as 23")
                 ->format(fn($value, $row, Column $column) => VehicleModelYear::where('vpic_make_id', $row->vpic_id)->orderBy('year')->first()->year ?? '' ),
-            Column::make("Max Year", "id as 22")
+            Column::make("Max Year", "name as 22")
                 ->format(fn($value, $row, Column $column) => VehicleModelYear::where('vpic_make_id', $row->vpic_id)->orderBy('year', 'desc')->first()->year ?? '' ),
         ];
     }

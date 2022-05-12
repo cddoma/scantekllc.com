@@ -22,37 +22,79 @@ use Illuminate\Support\Facades\Http;
 class Update extends Component
 {
     protected $vehicle;
-    public $ro;
-    public $state = [];
-    public $options = [];
-    public $make;
-    public $model;
-    public $search;
-    public $product_id;
+    protected $ro;
+    // public $state = [];
+    // public $options = [];
+    // public $make;
+    // public $model;
+    public $search = '';
+    public $vehicle_id;
+    public $vin;
+    public $year;
+    public $vpic_make_id;
+    public $vpic_model_id;
+    public $ro_id;
+    public $team_id;
+    public $ro_num;
+    public $technician;
     public $adjuster_id;
+    public $product;
+    public $product_price;
 
     protected $listeners = ['updateVehicleIds' => 'updateVehicleIds', 'refresh' => '$refresh'];
 
-    public function mount($ro_id = '')
+    public function mount($ro_id)
     {
-        $this->ro = RO::findOrNew($ro_id)->withoutRelations()->toArray();
-        $vehicle_id = $this->ro['vehicle_id'] ?? 0;
-        $this->vehicle = Vehicle::findOrNew($vehicle_id);
-        $this->state = $this->vehicle->withoutRelations()->toArray();
-        // $this->team_id = $this->state['team_id'] ?? \Auth::user()->current_team_id;
-        $this->search = $this->state['name'] ?? '';
-        $this->product = '';
+        /*
+        $this->product = 
+        $this->product_price = 
+        $this->ro_num = 
+        $this->vin = 
+        $this->vpic_make_id = 
+        $this->vpic_model_id = 
+        $this->adjuster_id = 
+        $this->technician = '';
+        */
+        $this->ro_id = $ro_id;
+        $this->ro = RO::where('id', $this->ro_id)->first();
+        $this->team_id = !\Auth::user()->super_admin ? \Auth::user()->current_team_id : ( $this->ro->team_id ?? 0);
+        $this->ro_num = $this->ro->ro ?? '';
+        $this->technician = $this->ro->technician ?? '';
+        $this->vehicle_id = $this->ro->vehicle->id ?? 0;
+        $this->vin = $this->ro->vehicle->vin ?? '';
+        $this->search = $this->ro->vehicle->name ?? '';
+        $this->ro_id = $this->ro->id ?? 0;
+        $this->adjuster_id = $this->ro->adjuster;
     }
 
+    private function newRO()
+    {
+        $vehicle = Vehicle::create(['team_id' => $this->team_id]);
+        $this->ro = RO::create(['team_id' => $this->team_id, 'created_by' => \Auth::user()->id, 'vehicle_id' => $vehicle->id]);
+                
+        return $this->ro->id;
+    }
     public function render()
     {
-        if(!empty($this->state['name']) && $this->search !== $this->state['name']) {
-            $this->emit('updateVehicleOptions', $this->state['name']);
+        if(!empty($this->team_id) && empty($this->ro->id) && (!empty($this->ro_num) || !empty($this->technician) || !empty($this->adjuster_id) || !empty($this->search) || !empty($this->vpic_make_id) || !empty($this->vpic_model_id))) {
+            $this->newRO();
         }
-        if(!empty($this->state['team_id']) && $this->state['team_id'] !== \Auth::user()->current_team_id ) {
-            $this->emit('updateAdjusterOptions', $this->state['team_id']);
+        if(!empty($this->search)) {
+            preg_match('/([0-2][0-9])([0-9][0-9])?( )?([a-z,A-Z,\-,&,\',\.,0-9]+)?( )?([0-9,a-z,A-Z,\-,\',\.,0-9]+)?( )?([0-9,a-z,A-Z,\-,&,\',\.,0-9]+)?/', $this->search, $matches);
+
+            if(strlen($this->search) == 17 && empty($matches[3])) {
+                $this->getVinData($this->search);
+            } else {
+                $this->emit('updateVehicleOptions', $this->search);
+            }
         }
-        $teams = Team::select('name', 'id')->get()->toArray();
+        if(!empty($this->team_id) && $this->team_id !== \Auth::user()->current_team_id ) {
+            $this->emit('updateAdjusterOptions', $this->team_id);
+        }
+        $teams = Team::select('teams.name', 'teams.id')
+            ->leftJoin('repair_orders', 'teams.id', '=', 'repair_orders.team_id')
+            ->groupBy('teams.id')
+            ->orderBy(DB::raw('count(repair_orders.id)'), 'desc')->get()->toArray();
         $products = Product::where([['hidden', 0], ['active', 1]])->select('name', 'id')->get()->toArray();
         return view('vehicles.update-form', [
             'teams' => $teams,
@@ -72,21 +114,30 @@ class Update extends Component
         ];
     }
 
+    public function addProduct($product, $price = '')
+    {
+        ROProduct::create(['repair_order_id' => $this->ro->id, 'name' => $product, 'product_id' => 0, 'price' => $price]);
+        $this->product = '';
+        $this->product_price = '';
+        $this->emit('refreshROProducts');
+    }
+
     public function updateProduct($product_id)
     {
-        $this->state['product_id'] = $product_id;
+        $this->product_id = $product_id;
     }
 
     public function updateAdjuster($user_id)
     {
-        $this->state['adjuster'] = $product_id;
+        $this->adjuster_id = $user_id;
+        $this->skipRender();
     }
 
     public function updateVehicleIds($year, $make_id, $model_id)
     {
-        $this->state['year'] = $year;
-        $this->state['vpic_make_id'] = $make_id;
-        $this->state['vpic_model_id'] = $model_id;
+        $this->year = $year;
+        $this->vpic_make_id = $make_id;
+        $this->vpic_model_id = $model_id;
         $this->skipRender();
     }
 
@@ -94,73 +145,48 @@ class Update extends Component
     {
         // $this->resetErrorBag();
 
-        if(empty($this->state['id'])) {
-            // VehicleModelYear::where([[''],[]])
-            if(!empty($this->state['vpic_make_id'])) {
-                $make = VehicleMake::where('vpic_id', $this->state['vpic_make_id'])->first();
-            }
-            if(!empty($this->state['vpic_model_id'])) {
-                $model = VehicleModel::where('vpic_id', $this->state['vpic_model_id'])->first();
-            }
-            $this->vehicle = Vehicle::create(
-                [
-                    'team_id' => \Auth::user()->super_admin ? $this->state['team_id'] : \Auth::user()->current_team_id,
-                    'name' => $this->state['name'] ?? null,
-                    'year' => $this->state['year'] ?? null,
-                    'make' => $make->name ?? null,
-                    'model' => $model->name ?? null,
-                    'trim' => $this->state['trim'] ?? null,
-                    'vin' => $this->state['vin'] ?? null,
-                    'vpic_make_id' => $this->state['vpic_make_id'] ?? null,
-                    'vpic_model_id' => $this->state['vpic_model_id'] ?? null,
-                ]
-            );
-            $this->emit('saved');
-            if(!empty($this->vehicle->vin)) {
-                $this->getVinData();
-            }
-            $ro = RO::create([
-                'team_id' => \Auth::user()->super_admin ? $this->state['team_id'] : \Auth::user()->current_team_id,
-                'created_by' => \Auth::user()->id,
-                'vehicle_id' => $this->vehicle->id,
-                // 'priority' => $this->state['priority'] ?? null,
-                // 'status' => $this->state['status'] ?? null,
-                'technician' => $this->state['technician'] ?? null,
-                'adjuster' => $this->state['adjuster'] ?? null,
-                'ro' => $this->state['ro'] ?? null,
-            ]);
-            if(!empty($this->state['product_id'])) {
-                ROProduct::create([
-                    'repair_order_id' => $ro->id,
-                    'product_id' => $this->state['product_id']
-                ]);
-            }
-
-            return redirect()->route('ro.index');
-        } else {
-            $this->vehicle = Vehicle::findOrFail($this->state['id']);
-            $this->vehicle->name = $this->state['name'];
-            $this->vehicle->year = $this->state['year'];
-            $this->vehicle->make = $this->state['make'];
-            $this->vehicle->model = $this->state['model'];
-            $this->vehicle->trim = $this->state['trim'];
-            $this->vehicle->vpic_make_id = $this->state['vpic_make_id'];
-            $this->vehicle->vpic_model_id = $this->state['vpic_model_id'];
-            $this->vehicle->save();
-            $this->emit('saved');
-            if($this->vehicle->vin !== $this->state['vin']) {
-                $this->vehicle->vin = $this->state['vin'];
-                $this->vehicle->save();
-                $this->getVinData();
-            }
+        if(empty($this->ro->vehicle->id)) {
+            $this->ro = RO::findOrFail($this->ro_id);
         }
+        if($this->ro->vehicle->name !== $this->search) {
+            // VehicleModelYear::where([[''],[]])
+            $this->ro->vehicle->name = $this->search;
+            if(!empty($this->vpic_make_id)) {
+                if($make = VehicleMake::where('vpic_id', $this->vpic_make_id)->first()) {
+                    $this->ro->vehicle->make = $make->name;
+                    $this->ro->vehicle->vpic_make_id = $this->vpic_make_id;
+                }
+            }
+            if(!empty($this->vpic_model_id)) {
+                if( $model = VehicleModel::where('vpic_id', $this->vpic_model_id)->first() ) {
+                    $this->ro->vehicle->model = $model->name;
+                    $this->ro->vehicle->vpic_model_id = $this->vpic_model_id;
+                }
+            }
+            $this->ro->vehicle->year = $this->year;
+            // $this->ro->vehicle->trim = $this->state['trim'];
+            $this->ro->vehicle->save();
+            $this->emit('saved');
+        }
+        $this->ro->ro = $this->ro_num;
+        $this->ro->technician = $this->technician;
+        $this->ro->adjuster = $this->adjuster_id;
+        if(!empty($this->product_id)) {
+            ROProduct::create([
+                'repair_order_id' => $this->ro->id,
+                'product_id' => $this->product_id ?? 0,
+                'name' => $this->product,
+            ]);
+            $this->emit('refreshROProducts');
+        }
+        $this->ro->save();
+        $this->emit('saved');
 
-        return redirect()->route('vehicles.show', $this->vehicle->id);
+        // return redirect()->route('ro.show', $this->ro->id);
     }
 
-    private function getVinData()
+    private function getVinData($vin)
     {
-        $vin = $this->vehicle->vin;
         // 17 CHARACTER VIN MAX
         if(strlen($vin) > 17 || empty($vin)) {
             return;
@@ -171,7 +197,7 @@ class Update extends Component
         }
         $response = json_decode(Http::get("https://vpic.nhtsa.dot.gov/api/vehicles/decodevinextended/$vin?format=json"));
         if($response->Count > 0) {
-            VehicleMeta::where([['vehicle_id', $this->vehicle->id],['source', 'vpic']])->delete();
+            VehicleMeta::where([['vehicle_id', $this->ro->vehicle->id],['source', 'vpic']])->delete();
             foreach($response->Results as $data) {
                 if(!empty($data->Variable) && !empty($data->Value)) {
                     if('not applicable' == strtolower(trim($data->Value))) {
@@ -179,31 +205,34 @@ class Update extends Component
                     }
                     switch ($data->Variable) {
                         case 'Make':
-                            $this->vehicle->make = $data->Value;
-                            $this->vehicle->vpic_make_id = $data->ValueId;
+                            $this->ro->vehicle->make = $data->Value;
+                            $this->ro->vehicle->vpic_make_id = $data->ValueId;
                             break;
                         
                         case 'Model':
-                            $this->vehicle->model = $data->Value;
-                            $this->vehicle->vpic_model_id = $data->ValueId;
+                            $this->ro->vehicle->model = $data->Value;
+                            $this->ro->vehicle->vpic_model_id = $data->ValueId;
                             break;
                         
                         case 'Model Year':
-                            $this->vehicle->year = $data->Value;
+                            $this->ro->vehicle->year = $data->Value;
                             break;
                         
                         case 'Trim':
-                            $this->vehicle->trim = $data->Value;
+                            $this->ro->vehicle->trim = $data->Value;
                             break;
                     }
                     $meta = VehicleMeta::updateOrCreate(
-                        ['vehicle_id' => $this->vehicle->id, 'source' => 'vpic', 'key' => $data->Variable],
+                        ['vehicle_id' => $this->ro->vehicle->id, 'source' => 'vpic', 'key' => $data->Variable],
                         ['value' => $data->Value]
                     );
                 }
             }
-            $this->vehicle->name = $this->vehicle->year . ' ' . $this->vehicle->make . ' ' . $this->vehicle->model . ' ' . $this->vehicle->trim;
-            $this->vehicle->save();
+            $this->ro->vehicle->vin = $vin;
+            $this->ro->vehicle->name = $this->ro->vehicle->year . ' ' . $this->ro->vehicle->make . ' ' . $this->ro->vehicle->model . ' ' . $this->ro->vehicle->trim . '  ' . $this->ro->vehicle->vin;
+            $this->ro->vehicle->save();
+            $this->emit('saved');
+            return redirect()->route('ro.show', $this->ro->id);
         }
     }
 }

@@ -19,10 +19,12 @@ class VehicleMetaTable extends DataTableComponent
     {
         $this->setPrimaryKey('id');
         $this->setPerPageAccepted([10, 25, 50, 100, 1000]);
-        $this->setPerPage(10);
+        $this->setPerPage(100);
         $this->setEmptyMessage('Enter the VIN to pull meta data.');
+        $this->setPaginationVisibilityDisabled();
+        $this->setPerPageVisibilityDisabled();
+        $this->setColumnSelectDisabled();
         $this->perPageAll = true;
-        $this->paginationEnabled = false;
     }
 
     public function mount($vehicleId)
@@ -45,9 +47,6 @@ class VehicleMetaTable extends DataTableComponent
                 ->sortable(),
             Column::make("Value", "value")
                 ->searchable()
-                ->sortable(),
-            Column::make("Source", "source")
-                ->deselected()
                 ->sortable(),
         ];
     }

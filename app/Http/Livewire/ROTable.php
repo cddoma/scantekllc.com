@@ -6,6 +6,7 @@ use Rappasoft\LaravelLivewireTables\DataTableComponent;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 use Rappasoft\LaravelLivewireTables\Views\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
 use App\Models\User;
 use App\Models\RepairOrder as RO;
 
@@ -15,14 +16,15 @@ class ROTable extends DataTableComponent
 
     public function configure(): void
     {
-        $this->setPageName('Repair Orders');
-        $this->setEmptyMessage('No Repair Orders found');
+        // $this->setTable('repair_orders');
+        $this->setPrimaryKey('id');
+        // $this->setPageName('repair_orders');
+        // $this->setEmptyMessage('No Repair Orders found');
         $this->setPerPageAccepted([10, 25, 50, 100]);
         $this->setFilterPillsEnabled();
         $this->setFilterLayoutSlideDown();
         $this->setDefaultSort('id', 'desc');
-        $this->setPrimaryKey('id')
-            ->setTableRowUrl(function($row) {
+        $this->setTableRowUrl(function($row) {
                 return route('ro.show', $row);
             });
         if(boolval(\Auth::user()->super_admin)) {
@@ -34,7 +36,7 @@ class ROTable extends DataTableComponent
 
     public function builder(): Builder
     {
-        $builder = RO::where('team_id', \Auth::user()->current_team_id);
+        $builder = RO::query()->where('team_id', \Auth::user()->current_team_id);
         if(boolval(\Auth::user()->super_admin)) {
             $builder = RO::query();
         }
@@ -42,7 +44,7 @@ class ROTable extends DataTableComponent
             ->leftJoin('repair_order_products', 'repair_orders.id', '=', 'repair_order_products.repair_order_id')
             ->leftJoin('products', 'repair_order_products.product_id', '=', 'products.id')
             ->groupBy('repair_orders.id')
-            ->selectRaw('GROUP_CONCAT(products.name) as product_names');
+            ->select(DB::raw('GROUP_CONCAT(products.name SEPARATOR \'<br>\') as services'));
         return $builder;
         //    ->when($this->getAppliedFilterWithValue('Super Admin'), fn($query, $super_admin) => $query->where('super_admin', $super_admin))
     }
@@ -52,7 +54,7 @@ class ROTable extends DataTableComponent
         return [
             Column::make("Id", "id")
                 ->hideIf(!boolval(\Auth::user()->super_admin))
-                ->deSelected()
+                ->deselected()
                 ->sortable()
                 ->collapseOnTablet(),
             Column::make("Status", "status")
@@ -61,35 +63,35 @@ class ROTable extends DataTableComponent
                 ->collapseOnMobile()
                 ->format(fn($value, $row, Column $column) => strtoupper($value)),
             Column::make("Priority", "priority")
-                ->deSelected()
+                ->deselected()
                 ->hideIf(!boolval(\Auth::user()->super_admin))
                 ->sortable()
                 ->collapseOnTablet(),
             Column::make("Shop", "team.name")
                 ->hideIf(!boolval(\Auth::user()->super_admin))
+                ->format(fn($value, $row, Column $column) => substr($value, 0, 12))
                 ->sortable()
                 ->searchable(),
             Column::make("RO", "ro")
                 ->sortable()
                 ->searchable()
                 ->collapseOnMobile(),
-            Column::make("Service", "id as 2")
-                ->format(fn($value, $row, Column $column) => $row->{'product_names'})
-                ->collapseOnMobile(),
+            Column::make("Services")
+                ->label(fn($row) => $row->{'services'})
+                ->html(),
             Column::make("Vehicle", "vehicle.name")
                 ->sortable()
-                ->searchable()
-                ->collapseOnMobile(),
+                ->searchable(),
             Column::make("Year", "vehicle.year")
-                ->deSelected()
+                ->deselected()
                 ->sortable()
                 ->searchable(),
             Column::make("Make", "vehicle.make")
-                ->deSelected()
+                ->deselected()
                 ->searchable()
                 ->collapseOnMobile(),
             Column::make("Model", "vehicle.model")
-                ->deSelected()
+                ->deselected()
                 ->sortable()
                 ->searchable(),
             Column::make("Created By", "createdby.name")

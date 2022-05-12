@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use OwenIt\Auditing\Contracts\Auditable;
 use App\Models\Team;
 use App\Models\RepairOrderProduct;
+use App\Models\Product;
 use App\Models\Vehicle;
 
 class RepairOrder extends Model implements Auditable

@@ -21,8 +21,7 @@ class VehicleModelTable extends DataTableComponent
 
     public function configure(): void
     {
-        $this->setPrimaryKey('vehicle_models.id');
-        $this->setPageName('Supported Models');
+        $this->setPrimaryKey('id');
         $this->setEmptyMessage('No Models found');
         $this->setPerPageAccepted([10, 25, 50, 100]);
         $this->setPerPage(10);
@@ -54,9 +53,7 @@ class VehicleModelTable extends DataTableComponent
         if(Auth::user()->super_admin) {
             
         }
-        return VehicleModel::query()->where('vehicle_models.vpic_make_id', $this->make_id)
-            ->join('vehicle_makes', 'vehicle_models.vpic_make_id', '=', 'vehicle_makes.vpic_id')
-            ->join('vehicle_make_types', 'vehicle_makes.vpic_id', '=', 'vehicle_make_types.vpic_make_id');
+        return VehicleModel::query()->where('vpic_make_id', $this->make_id);
     }
 
     public function getTypes(): array
@@ -107,12 +104,12 @@ class VehicleModelTable extends DataTableComponent
             Column::make("Model", "name")
                 ->sortable()
                 ->searchable(),
-            Column::make("Min Year", "id as 23")
-                ->deSelected()
-                ->format(fn($value, $row, Column $column) => VehicleModelYear::where('vpic_model_id', $row->vpic_id)->orderBy('year')->first()->year ?? '' ),
-            Column::make("Max Year", "id as 22")
-                ->deSelected()
-                ->format(fn($value, $row, Column $column) => VehicleModelYear::where('vpic_model_id', $row->vpic_id)->orderBy('year', 'desc')->first()->year ?? '' ),
+            // Column::make("Min Year", "vpic_id as 23")
+            //     ->deSelected()
+            //     ->format(fn($value, $row, Column $column) => VehicleModelYear::where('vpic_model_id', $row->vpic_id)->orderBy('year')->first()->year ?? '' ),
+            // Column::make("Max Year", "vpic_id as 22")
+            //     ->deSelected()
+            //     ->format(fn($value, $row, Column $column) => VehicleModelYear::where('vpic_model_id', $row->vpic_id)->orderBy('year', 'desc')->first()->year ?? '' ),
         ];
     }
 

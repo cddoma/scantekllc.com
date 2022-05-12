@@ -25,6 +25,8 @@ class SelectList extends Component
 
         preg_match('/([0-2][0-9])([0-9][0-9])?( )?([a-z,A-Z,\-,&,\',\.,0-9]+)?( )?([0-9,a-z,A-Z,\-,\',\.,0-9]+)?( )?([0-9,a-z,A-Z,\-,&,\',\.,0-9]+)?/', $this->searchTerm, $matches);
 
+        if(strlen($this->searchTerm) == 17 && empty($matches[3])) {
+        }
         if(!empty($matches[1])) {
             // first 2 digits of year
             $year = $matches[1];
