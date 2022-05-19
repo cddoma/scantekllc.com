@@ -64,7 +64,7 @@ class Update extends Component
         $this->vin = $this->ro->vehicle->vin ?? '';
         $this->search = $this->ro->vehicle->name ?? '';
         $this->ro_id = $this->ro->id ?? 0;
-        $this->adjuster_id = $this->ro->adjuster;
+        $this->adjuster_id = $this->ro->adjuster ?? 0;
     }
 
     private function newRO()

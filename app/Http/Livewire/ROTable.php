@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use App\Models\User;
 use App\Models\RepairOrder as RO;
+use \Carbon\Carbon;
 
 class ROTable extends DataTableComponent
 {
@@ -16,10 +17,9 @@ class ROTable extends DataTableComponent
 
     public function configure(): void
     {
-        // $this->setTable('repair_orders');
         $this->setPrimaryKey('id');
-        // $this->setPageName('repair_orders');
-        // $this->setEmptyMessage('No Repair Orders found');
+        $this->setPageName('Repair Orders');
+        $this->setEmptyMessage('No Repair Orders found');
         $this->setPerPageAccepted([10, 25, 50, 100]);
         $this->setFilterPillsEnabled();
         $this->setFilterLayoutSlideDown();
@@ -105,9 +105,13 @@ class ROTable extends DataTableComponent
                 ->collapseOnTablet(),
             Column::make("Updated At", "updated_at")
                 ->hideIf(!boolval(\Auth::user()->super_admin))
-                ->deSelected()
+                ->deselected()
                 ->sortable()
                 ->collapseOnTablet(),
+            Column::make("Elapsed Time", "created_at as created_at2")
+                ->sortable()
+                ->collapseOnMobile()
+                ->format(fn($value, $row, Column $column) => (Carbon::parse($row->created_at))->diffForHumans()),
         ];
     }
 }

@@ -28,8 +28,9 @@ class CreateTeam implements CreatesTeams
 
         Validator::make($input, [
             'name' => ['required', 'string', 'max:255'],
-            // 'owner' => ['required', 'string', 'max:255'],
-            // 'email' => ['required', 'email'],
+            'manager' => ['string', 'max:255'],
+            'phone' => ['string', 'max:255'],
+            'email' => ['email'],
         ])->validateWithBag('createTeam');
 
         AddingTeam::dispatch($user);
@@ -45,6 +46,10 @@ class CreateTeam implements CreatesTeams
         $team = Team::create([
             'name' => $input['name'],
             'user_id' => $user->id,
+            'manager' => $input['manager'],
+            'phone' => $input['phone'],
+            'email' => $input['email'],
+            'address' => $input['address'],
             'personal_team' => false,
         ]);
         // Password::sendResetLink(['email' => $new_user->email]);

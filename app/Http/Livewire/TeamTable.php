@@ -91,8 +91,29 @@ class TeamTable extends DataTableComponent
                 ->sortable()
                 ->searchable()
                 ->collapseOnMobile()
-                ->deSelected(),
+                ->deselected(),
             Column::make("Name", "name")
+                ->sortable()
+                ->searchable(),
+            Column::make("Manager")
+                ->collapseOnMobile()
+                ->sortable()
+                ->searchable(),
+            Column::make("Phone")
+                ->collapseOnMobile()
+                ->sortable()
+                ->searchable()
+                ->format(fn($value, $row, Column $column) => '<a href="tel:'.$value.'">'.$value.'</a>')
+                ->html(),
+            Column::make("Email")
+                ->collapseOnMobile()
+                ->sortable()
+                ->searchable()
+                ->format(fn($value, $row, Column $column) => '<a href="mailto:'.$value.'">'.$value.'</a>')
+                ->html(),
+            Column::make("Address")
+                ->collapseOnMobile()
+                ->deselected()
                 ->sortable()
                 ->searchable(),
             Column::make("ROs", 'user_id as 2')
@@ -104,11 +125,11 @@ class TeamTable extends DataTableComponent
             Column::make("Created at", "created_at")
                 ->sortable()
                 ->collapseOnMobile()
-                ->deSelected(),
+                ->deselected(),
             Column::make("Updated at", "updated_at")
                 ->sortable()
                 ->collapseOnMobile()
-                ->deSelected(),
+                ->deselected(),
         ];
     }
 }

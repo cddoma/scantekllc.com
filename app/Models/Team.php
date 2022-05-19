@@ -32,6 +32,10 @@ class Team extends JetstreamTeam implements Auditable
         'name',
         'user_id',
         'personal_team',
+        'manager',
+        'email',
+        'phone',
+        'address',
     ];
 
     /**
