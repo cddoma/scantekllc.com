@@ -23,9 +23,9 @@ class ROTable extends DataTableComponent
         $this->setPerPageAccepted([10, 25, 50, 100]);
         $this->setFilterPillsEnabled();
         $this->setFilterLayoutSlideDown();
-        $this->setDefaultSort('id', 'desc');
+        $this->setDefaultSort('updated_at', 'desc');
         $this->setTableRowUrl(function($row) {
-                return route('ro.show', $row);
+                return route('ro.show', (!empty(trim($row->ro)) ? $row->ro : $row->id));
             });
         if(boolval(\Auth::user()->super_admin)) {
             $this->setPerPage(100);
@@ -36,7 +36,7 @@ class ROTable extends DataTableComponent
 
     public function builder(): Builder
     {
-        $builder = RO::query()->where('team_id', \Auth::user()->current_team_id);
+        $builder = RO::query()->where('repair_orders.team_id', \Auth::user()->current_team_id);
         if(boolval(\Auth::user()->super_admin)) {
             $builder = RO::query();
         }
@@ -44,7 +44,7 @@ class ROTable extends DataTableComponent
             ->leftJoin('repair_order_products', 'repair_orders.id', '=', 'repair_order_products.repair_order_id')
             ->leftJoin('products', 'repair_order_products.product_id', '=', 'products.id')
             ->groupBy('repair_orders.id')
-            ->select(DB::raw('GROUP_CONCAT(products.name SEPARATOR \'<br>\') as services'));
+            ->addSelect(DB::raw('GROUP_CONCAT(products.name SEPARATOR \'<br>\') as services'));
         return $builder;
         //    ->when($this->getAppliedFilterWithValue('Super Admin'), fn($query, $super_admin) => $query->where('super_admin', $super_admin))
     }
@@ -57,40 +57,42 @@ class ROTable extends DataTableComponent
                 ->deselected()
                 ->sortable()
                 ->collapseOnTablet(),
-            Column::make("Status", "status")
-                ->sortable()
-                ->searchable()
-                ->collapseOnMobile()
-                ->format(fn($value, $row, Column $column) => strtoupper($value)),
-            Column::make("Priority", "priority")
-                ->deselected()
+            Column::make("SHOP", "team.name")
                 ->hideIf(!boolval(\Auth::user()->super_admin))
-                ->sortable()
-                ->collapseOnTablet(),
-            Column::make("Shop", "team.name")
-                ->hideIf(!boolval(\Auth::user()->super_admin))
-                ->format(fn($value, $row, Column $column) => substr($value, 0, 12))
                 ->sortable()
                 ->searchable(),
             Column::make("RO", "ro")
                 ->sortable()
                 ->searchable()
                 ->collapseOnMobile(),
-            Column::make("Services")
+            Column::make("SERVICES")
                 ->label(fn($row) => $row->{'services'})
-                ->html(),
-            Column::make("Vehicle", "vehicle.name")
+                ->html()
+                ->collapseOnTablet(),
+            Column::make("Elapsed Time", "created_at as created_at2")
+                ->collapseOnMobile()
+                ->format(fn($value, $row, Column $column) => (Carbon::parse($row->created_at))->diffForHumans()),
+            Column::make("VEHICLE", "vehicle.name")
                 ->sortable()
                 ->searchable(),
-            Column::make("Year", "vehicle.year")
+            Column::make("Service Advisor", "service_advisor")
                 ->deselected()
                 ->sortable()
                 ->searchable(),
-            Column::make("Make", "vehicle.make")
+            Column::make("PRIORITY", "priority")
+                ->deselected()
+                ->hideIf(!boolval(\Auth::user()->super_admin))
+                ->sortable()
+                ->collapseOnTablet(),
+            Column::make("YEAR", "vehicle.year")
+                ->deselected()
+                ->sortable()
+                ->searchable(),
+            Column::make("MAKE", "vehicle.make")
                 ->deselected()
                 ->searchable()
                 ->collapseOnMobile(),
-            Column::make("Model", "vehicle.model")
+            Column::make("MODEL", "vehicle.model")
                 ->deselected()
                 ->sortable()
                 ->searchable(),
@@ -102,16 +104,19 @@ class ROTable extends DataTableComponent
                 ->hideIf(true),
             Column::make("Created At", "created_at")
                 ->sortable()
+                ->format(fn($value, $row, Column $column) => '<span class="text-center" style="display:inline-grid;line-height:1;margin-top:-0.25em;">'.(Carbon::parse($value))->format("m-d-Y<br>g:i A").'</span>')->html()
                 ->collapseOnTablet(),
             Column::make("Updated At", "updated_at")
                 ->hideIf(!boolval(\Auth::user()->super_admin))
                 ->deselected()
                 ->sortable()
+                ->format(fn($value, $row, Column $column) => (Carbon::parse($value))->diffForHumans())
                 ->collapseOnTablet(),
-            Column::make("Elapsed Time", "created_at as created_at2")
-                ->sortable()
-                ->collapseOnMobile()
-                ->format(fn($value, $row, Column $column) => (Carbon::parse($row->created_at))->diffForHumans()),
+            // Column::make("STATUS", "status")
+            //     ->sortable()
+            //     ->searchable()
+            //     ->collapseOnMobile()
+            //     ->format(fn($value, $row, Column $column) => strtoupper($value)),
         ];
     }
 }

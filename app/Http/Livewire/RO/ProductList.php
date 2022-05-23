@@ -24,6 +24,6 @@ class ProductList extends Component
             ->leftJoin('repair_order_products', 'repair_orders.id', '=', 'repair_order_products.repair_order_id')
             ->leftJoin('products', 'repair_order_products.product_id', '=', 'products.id')
             ->groupBy('technician')->get()->pluck('technician')->toArray();
-        return view('livewire.r-o.adjuster-list');
+        return view('livewire.r-o.product-list');
     }
 }

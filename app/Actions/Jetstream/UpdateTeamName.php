@@ -22,9 +22,9 @@ class UpdateTeamName implements UpdatesTeamNames
 
         Validator::make($input, [
             'name' => ['required', 'string', 'max:255'],
-            'manager' => ['string', 'max:255'],
-            'phone' => ['string', 'max:255'],
-            'email' => ['email'],
+            'manager' => ['nullable', 'string', 'max:255'],
+            'phone' => ['nullable', 'string', 'max:255'],
+            'email' => ['nullable', 'email'],
         ])->validateWithBag('updateTeamName');
 
         $team->forceFill([

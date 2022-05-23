@@ -2,7 +2,7 @@
     <x-slot name="title">{{ __('Repair Orders') }}</x-slot>
 
     <div>
-        <a href="{{ route('vehicles.create') }}"  class="inline float-right ml-1 mt-1 mr-3" style="line-height: 2.125em;">
+        <a href="{{ route('ro.create') }}"  class="inline float-right ml-1 mt-1 mr-3" style="line-height: 2.125em;">
             <x-jet-button type="button">
                 {{ __('New RO') }}
             </x-jet-button>

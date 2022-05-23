@@ -20,17 +20,31 @@ Route::middleware([
     config('jetstream.auth_session'),
     'verified'
 ])->group(function () {
-    Route::get('/', function () { return view('dashboard'); });
-    Route::get('/dashboard', function () { return view('dashboard'); })->name('dashboard');
+    Route::get('/', function () { return redirect()->route('ro.index'); });
+    // Route::get('/dashboard', function () { return view('dashboard'); })->name('dashboard');
     // Route::get('/welcome', function () { return view('welcome'); });
     Route::get('/users', function () { return view('users.index'); })->name('users.index');
     Route::get('/user/{id}', function () { return view('users.show'); })->name('users.show');
 
-    Route::get('/ro', function () { return view('ro.index'); })->name('ro.index');
+    Route::get('/repair-orders', function () { return view('ro.index'); })->name('ro.index');
+    Route::get('/ro/create', function () { 
+        $teamId = \Auth::user()->current_team_id ?? 0; 
+        $vehicle = \App\Models\Vehicle::create(['team_id' => $teamId]);
+        $ro = \App\Models\RepairOrder::create([
+            'priority' => 1, 
+            'status' => 'requested', 
+            'team_id' => $teamId, 
+            'created_by' => \Auth::user()->id, 
+            'vehicle_id' => $vehicle->id,
+        ]);
+        return redirect()->route('ro.show', $ro->id);
+    })->name('ro.create');
     Route::get('/ro/{id}', function ($id) { 
-        $ro = \App\Models\RepairOrder::findOrFail($id);
-        return view('ro.show', ['ro_id' => $id, 'vehicleId' => $ro->vehicle_id]); })->name('ro.show');
-    Route::get('/ro/create', function () { return view('ro.show'); })->name('ro.create');
+        $ro = \App\Models\RepairOrder::getByRO($id);
+        $ro_id = !empty($ro->ro) ? $ro->ro : $ro->id;
+        return view('ro.show', ['ro_id' => $ro_id, 'vehicleId' => $ro->vehicle->id]); 
+    })->name('ro.show');
+
 
     Route::get('/vehicles', function () { return view('vehicles.index'); })->name('vehicles.index');
     Route::get('/vehicle/create', function () { return view('vehicles.show'); })->name('vehicles.create');

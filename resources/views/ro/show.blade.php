@@ -13,9 +13,9 @@
             {{-- <x-jet-section-border /> --}}
             @livewire('vehicles.update', ['ro_id' => $ro_id])
             <x-jet-section-border />
-            @livewire('r-o.vindata', ['vehicleId' => $vehicleId])
+           {{-- @livewire('r-o.vindata', ['vehicleId' => $vehicleId]) --}}
             <x-jet-section-border />
-            @livewire('r-o.delete-r-o')
+            {{-- @livewire('r-o.delete-r-o') --}}
 
             @if (\Auth::user()->super_admin)
             @endif

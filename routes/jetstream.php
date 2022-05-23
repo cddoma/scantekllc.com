@@ -36,11 +36,11 @@ Route::group(['middleware' => config('jetstream.middleware', ['web'])], function
 
         // Teams...
         if (Jetstream::hasTeamFeatures()) {
-            Route::get('/accounts', function () {
+            Route::get('/shops', function () {
                 return view('teams.index');
-            })->name('accounts.index');
-            Route::get('/account/create', [TeamController::class, 'create'])->name('accounts.create');
-            Route::get('/account/{team}', [TeamController::class, 'show'])->name('accounts.show');
+            })->name('shops.index');
+            Route::get('/shop/create', [TeamController::class, 'create'])->name('shops.create');
+            Route::get('/shop/{team}', [TeamController::class, 'show'])->name('shops.show');
             Route::put('/current-account', [CurrentTeamController::class, 'update'])->name('current-account.update');
 
             Route::get('/account-invitations/{invitation}', [TeamInvitationController::class, 'accept'])

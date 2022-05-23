@@ -21,7 +21,7 @@ class RepairOrder extends Model implements Auditable
         'vehicle_id', 
         'priority', 
         'status', 
-        'adjuster', 
+        'service_advisor', 
         'technician', 
         'user_notes', 
         'notes', 
@@ -30,7 +30,6 @@ class RepairOrder extends Model implements Auditable
     protected $casts = [
         'team_id' => 'integer',
         'created_by' => 'integer',
-        'adjuster' => 'integer',
         'vehicle_id' => 'integer',
     ];
 
@@ -52,5 +51,20 @@ class RepairOrder extends Model implements Auditable
     public function createdBy()
     {
         return $this->hasOne(User::class, 'id', 'created_by');
+    }
+
+    public static function getByRO($ro) {
+        $user = \Auth::user();
+        $filters = [
+            ['ro', $ro],
+        ];
+        if(!$user->super_admin) {
+            $filters[] = ['team_id', $user->current_team_id];
+        }
+        $ro_entity = RepairOrder::where($filters)->first();
+        if(empty($ro_entity)) {
+            $ro_entity = RepairOrder::findOrFail(intval($ro));
+        }
+        return $ro_entity;
     }
 }

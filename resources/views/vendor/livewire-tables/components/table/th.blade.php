@@ -11,7 +11,7 @@
 @if ($theme === 'tailwind')
     <th scope="col" {{
         $attributes->merge($customAttributes)
-            ->class(['px-6 py-3 text-left text-xs font-medium whitespace-nowrap text-gray-500 uppercase tracking-wider dark:bg-gray-800 dark:text-gray-400' => $customAttributes['default'] ?? true])
+            ->class(['px-6 py-3 text-left text-xs font-medium whitespace-nowrap text-gray-500  tracking-wider dark:bg-gray-800 dark:text-gray-400' => $customAttributes['default'] ?? true])
             ->class(['hidden sm:table-cell' => $column->shouldCollapseOnMobile()])
             ->class(['hidden md:table-cell' => $column->shouldCollapseOnTablet()])
             ->except('default')

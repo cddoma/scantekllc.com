@@ -5,21 +5,21 @@
             <div class="flex">
                 <!-- Logo -->
                 <div class="shrink-0 flex items-center">
-                    <a href="{{ route('dashboard') }}">
+                    <a href="{{ route('ro.index') }}">
                         <x-jet-application-mark class="block h-9 w-auto" />
                     </a>
                 </div>
 
                 <!-- Navigation Links -->
                 <div class="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex">
-                    <x-jet-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('dashboard')">
+                    <!-- <x-jet-nav-link href="{{-- route('dashboard') --}}" :active="request()->routeIs('dashboard')">
                         {{ __('Dashboard') }}
-                    </x-jet-nav-link>
+                    </x-jet-nav-link> -->
                     <x-jet-nav-link href="{{ route('ro.index') }}" :active="request()->routeIs('ro.index')">
                         {{ __('Repair Orders') }}
                     </x-jet-nav-link>
                     @if (boolval(Auth::user()->super_admin))
-                        <x-jet-nav-link href="{{ route('accounts.index') }}" :active="request()->routeIs('accounts.index')">
+                        <x-jet-nav-link href="{{ route('shops.index') }}" :active="request()->routeIs('shops.index')">
                             {{ __('Shops') }}
                         </x-jet-nav-link>
                         <x-jet-nav-link href="#">
@@ -137,10 +137,18 @@
                 </div>
             </div>
 
+@php
+$path = explode('/', request()->decodedPath());
+$page = strtoupper($path[0]);
+if($page == 'REPAIR-ORDER') {
+
+    $page = 'RO# ' . $path[1];
+}
+@endphp
             <!-- Hamburger -->
             <div class="-mr-2 flex items-center sm:hidden">
                 <button @click="open = ! open" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 focus:text-gray-500 transition">
-                <b class="mr-2">{{ str_replace('/', ' ', strtoupper(request()->decodedPath())) }}</b>
+                <b class="mr-2">{{ $page }}</b>
                     <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
                         <path :class="{'hidden': open, 'inline-flex': ! open }" class="inline-flex" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
                         <path :class="{'hidden': ! open, 'inline-flex': open }" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -153,14 +161,14 @@
     <!-- Responsive Navigation Menu -->
     <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
         <div class="pt-2 pb-3 space-y-1">
-            <x-jet-responsive-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('dashboard')">
+            <!-- <x-jet-responsive-nav-link href="{{-- route('dashboard') --}}" :active="request()->routeIs('dashboard')">
                 {{ __('Dashboard') }}
-            </x-jet-responsive-nav-link>
+            </x-jet-responsive-nav-link> -->
             <x-jet-responsive-nav-link href="{{ route('ro.index') }}" :active="request()->routeIs('ro.index')">
                 {{ __('Repair Orders') }}
             </x-jet-responsive-nav-link>
             @if (boolval(Auth::user()->super_admin))
-                <x-jet-responsive-nav-link href="{{ route('accounts.index') }}" :active="request()->routeIs('accounts.index')">
+                <x-jet-responsive-nav-link href="{{ route('shops.index') }}" :active="request()->routeIs('shops.index')">
                     {{ __('Shops') }}
                 </x-jet-responsive-nav-link>
                 <x-jet-responsive-nav-link href="{{ route('users.index') }}" :active="request()->routeIs('users.index')">

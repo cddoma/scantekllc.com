@@ -4,82 +4,70 @@ namespace App\Http\Livewire\Vehicles;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 use App\Models\Team;
+use App\Models\Vehicle;
 
 class SelectList extends Component
 {
     public $options;
-    public String $searchTerm = '';
-    public String $year;
-    public String $make;
-    public String $model;
+    public string $searchTerm = '';
+    public string $year;
+    public string $make;
+    public string $model;
+    public int $model_id;
+    public int $vehicleId;
 
     protected $listeners = ['updateVehicleOptions' => 'update'];
 
     public function update($searchTerm = '')
     {
-        $this->searchTerm = !empty($searchTerm) ? $searchTerm : $this->searchTerm;
-        $year = '';
-        $make = '';
-        $model = '';
+        $this->searchTerm = $searchTerm;
         $matches = [];
-
-        preg_match('/([0-2][0-9])([0-9][0-9])?( )?([a-z,A-Z,\-,&,\',\.,0-9]+)?( )?([0-9,a-z,A-Z,\-,\',\.,0-9]+)?( )?([0-9,a-z,A-Z,\-,&,\',\.,0-9]+)?/', $this->searchTerm, $matches);
-
+        preg_match('/([0-2][0-9])([0-9][0-9]?)?( )?(.*)?/', $this->searchTerm, $matches);
         if(strlen($this->searchTerm) == 17 && empty($matches[3])) {
         }
         if(!empty($matches[1])) {
             // first 2 digits of year
             $year = $matches[1];
-            if(!empty($matches[2]) && \Str::length($matches[2]) == 2) {
-                // last 2 digits of year
-                $year .= $matches[2];
-            }
-            if(empty($matches[2])) {
-                $year = '20'.$year;
-                $this->year = $year;
-            } 
-            // make
-            if(!empty($year) && !empty($matches[4])  && \Str::length($matches[4]) > 1) {
-                $make = $matches[4];
-                if(!empty($matches[7]) && !empty($matches[6])) {
-                    $make = $matches[4] . ' ' . $matches[6];
-                }
-                $make = strtoupper($make);
-                $this->make = $make;
-            } 
-            // model
-            if(!empty($year) && !empty($make) && !empty($matches[5])) {
-                if(!empty($matches[7])) {
-                    $model = $matches[8] ?? '';
-                }
-                if(empty($matches[7])) {
-                    $model = $matches[6] ?? '';
-                } 
-                $model = strtoupper($model);
-                $this->model = $model;
-            } 
-            // get options
-            if(!empty($year)) {
-                if(!empty($make)) {
-                    if($make_id = $this->makeExists($make)) {
-                        // get models
-                        $this->options = $this->getVehicleModels($year, $make_id, trim($model));
-                    } else {
-                        // get makes
-                        $this->options = $this->getVehicleMakes($year, $make);
-                    } 
+            if(!empty($matches[2])) {
+                if(\Str::length($matches[2]) == 2) {
+                    // last 2 digits of year
+                    $year .= $matches[2];
+                    $this->year = $year;
                 } else {
-                    // default makes
-                    $this->options = $this->getVehicleMakesShortlist($year);
+                    $this->options = $this->getYears();
+                }
+            } else {
+                if(!empty($matches[3])) {
+                    $year = '20'.$year;
+                    $this->year = $year;
                 } 
+            } 
+            if(isset($matches[3]) || \Str::length($this->year) == 4) {
+                // make
+                if(isset($matches[4])) {
+                    $make = trim($matches[4]);
+                    $this->options = $this->getVehicleMakes($year, $make);
+                }
             }
-        } 
+        } else {
+            $this->options = $this->getYears();
+        }
     }
 
-    public function mount($searchTerm = '')
+    private function getYears()
+    {
+        $options = [];
+        for ($year=intval(date("Y")); $year >= intval(date("Y")-30); $year--) { 
+            $options[] = [ 'year' => $year, 'value' => $year.' ', 'make_id' => '', 'model_id' => '' ];
+        }
+        return $options;
+    }
+
+    public function mount($vehicleId)
     {
         // $this->searchTerm = $searchTerm;
-        // $this->options = $this->getVehicleMakesShortlist();
+        $this->vehicleId = $vehicleId;
+        $this->options = $this->getYears();
     }
 
     public function render()
@@ -90,10 +78,12 @@ class SelectList extends Component
         return view('livewire.vehicles.select-list');
     }
 
+/*
     private function getVehicleMakesShortlist($year = '', $make = '')
     {
-        $make = strtoupper($make);
         $return = [];
+        return $return;
+        $make = strtoupper($make);
         $makes = [
             "36" => "ACURA",
             "53" => "ALFA ROMEO",
@@ -137,7 +127,7 @@ class SelectList extends Component
         foreach ($makes as $id => $name) {
             if(trim($make) == '' || str_starts_with($name, $make) || $name == $make){
                 $vehicleMake = [];
-                $vehicleMake['make_id'] = $id;
+                $vehicleMake['make_id'] = $name;
                 $vehicleMake['model_id'] = '';
                 $vehicleMake['year'] = $year;
                 $vehicleMake['value'] = $year . ' ' . $name . ' ';
@@ -146,29 +136,35 @@ class SelectList extends Component
         }
         return $return;
     }
+*/
 
     private function getVehicleMakes($year, $make)
     {
         $return = [];
-        foreach( DB::table('vehicle_makes')
-            // ->join('vehicle_model_years', 'vehicle_makes.vpic_id', '=', 'vehicle_model_years.vpic_make_id')
-            // ->join('vehicle_make_types', 'vehicle_makes.vpic_id', '=', 'vehicle_make_types.vpic_make_id')
-            // ->whereIn('vehicle_make_types.vpic_id', [2,3,5,7])
+        $count = 0;
+        $makes = DB::table('tbl_models')
             ->where([
-                // ['vehicle_model_years.year', $year],
-                ['vehicle_makes.name', 'LIKE', "{$make}%"],
+                ['model_sold_in_us', 1],
+                ['model_year', $year],
+                [DB::raw('CONCAT(model_make_display, " ", model_name)'), 'LIKE', "{$make}%"],
             ])
-            ->groupBy('vehicle_makes.vpic_id')
-            ->orderBy('vehicle_makes.name')
-            ->select('vehicle_makes.vpic_id as make_id', 'vehicle_makes.name as make')
-            ->get()
-            as $row 
-        ) {
+            ->groupBy('model_make_id')
+            ->orderBy('model_make_id', 'asc')
+            ->select('model_make_display as make', 'model_make_id as make_id')
+            ->limit(40)
+            ->get();
+        $count = count($makes);
+        foreach($makes as $row) {
+            if($count == 1) {
+                $this->year = $year;
+                $this->make = $row->make;
+                $this->make_id = $row->make_id;
+                return $this->getVehicleModels($year, $row->make_id, $make);
+            }
             $vehicleMake = [];
-            $vehicleMake['make_id'] = $row->make_id;
-            $vehicleMake['model_id'] = '';
+            $vehicleMake['make'] = $row->make;
             $vehicleMake['year'] = $year;
-            $vehicleMake['value'] = $year . ' ' . strtoupper($row->make) . ' ';
+            $vehicleMake['value'] = $year . ' ' . $row->make . ' ';
             $return[] = $vehicleMake;
         }
         return $return;
@@ -178,43 +174,94 @@ class SelectList extends Component
     {
         $return = [];
         $count = 0;
-        $models = DB::table('vehicle_models')
-            ->join('vehicle_makes', 'vehicle_models.vpic_make_id', '=', 'vehicle_makes.vpic_id')
-            // ->join('vehicle_model_years', 'vehicle_makes.vpic_id', '=', 'vehicle_model_years.vpic_make_id')
-            // ->join('vehicle_make_types', 'vehicle_makes.vpic_id', '=', 'vehicle_make_types.vpic_make_id')
-            // ->whereIn('vehicle_make_types.vpic_id', [2,3,5,7])
+        $models = DB::table('tbl_models')
             ->where([
-                // ['vehicle_model_years.year', $year],
-                ['vehicle_makes.vpic_id', '=', $make_id],
-                ['vehicle_models.name', 'LIKE', "{$model}%"],
+                ['model_sold_in_us', 1],
+                ['model_year', $year],
+                ['model_make_id', $make_id],
+                [DB::raw('CONCAT(model_make_display, " ", model_name)'), 'LIKE', "%{$model}%"],
             ])
-            ->groupBy('vehicle_models.id')
-            ->select('vehicle_makes.vpic_id as make_id', 'vehicle_models.vpic_id as model_id', 'vehicle_makes.name as make', 'vehicle_models.name as model')
+            
+            ->orderBy('model_name', 'asc')
+            ->distinct('model_name')
+            ->select('model_make_id as make_id', 'model_make_display as make', 'model_name as model')
+            ->limit(40)
             ->get();
         $count = count($models);
         foreach( $models as $row ) {
+            if($count == 1) {
+                $this->year = $year;
+                $this->make = $row->make;
+                $this->make_id = $row->make_id;
+                $this->model = $row->model;
+                // $this->emit('updateVehicleIds', $year, $row->make_id, $row->model_id);
+                // return $this->getVehicleTrims($year, $row->make, $this->searchTerm);
+            }
             $vehicleMake = [];
             $vehicleMake['make_id'] = $make_id;
-            $vehicleMake['model_id'] = $row->model_id;
+            $vehicleMake['model'] = $row->model;
             $vehicleMake['year'] = $year;
-            $vehicleMake['value'] = $year . ' ' . strtoupper($row->make) . ' ' . strtoupper($row->model);
+            $vehicleMake['value'] = $year . ' ' . $row->make . ' ' . $row->model;
             $return[] = $vehicleMake;
-            if($count == 1) {
-                $this->emit('updateVehicleIds', $year, $make_id, $row->model_id);
-            }
         }
         return $return;
     }
 
-    public function makeExists($make)
+    private function getVehicleTrims($year, $make_id, $search)
     {
-        return DB::table('vehicle_makes')
-            // ->join('vehicle_make_types', 'vehicle_makes.vpic_id', '=', 'vehicle_make_types.vpic_make_id')
-            // ->whereIn('vehicle_make_types.vpic_id', [2,3,5,7,10])
-            ->where('vehicle_makes.name', $make)
-            // ->groupBy('vehicle_makes.vpic_id')
-            ->select('vehicle_makes.vpic_id')
-            ->first()
-            ->vpic_id ?? false;
+        $return = [];
+        $count = 0;
+        $models = DB::table('tbl_models')
+            ->where([
+                ['model_sold_in_us', 1],
+                ['model_year', $year],
+                ['model_make_id', $make_id],
+                [DB::raw('CONCAT(model_year, " ", model_make_display, " ", model_name, " ", model_trim)'), 'LIKE', "{$search}%"],
+            ])
+            ->groupBy('model_name', 'model_trim')
+            ->orderBy('model_name', 'asc')
+            ->limit(25)
+            ->select('model_id as model_id', 'model_make_display as make', 'model_name as model')
+            ->get();
+        $count = count($models);
+        foreach( $models as $row ) {
+            $vehicleMake = [];
+            $vehicleMake['make_id'] = $row->make;
+            $vehicleMake['model_id'] = $row->model_id;
+            $vehicleMake['model'] = $row->model;
+            $vehicleMake['year'] = $year;
+            $vehicleMake['value'] = $year . ' ' . $row->make . ' ' . $row->model;
+            if($count == 1) {
+                if($this->vehicleId > 0) {
+                    $vehicle = Vehicle::findOrFail($this->vehicleId);
+                    $vehicle->year = $year;
+                    $vehicle->make = $row->make;
+                    $vehicle->model = $row->model;
+                    $vehicle->model_id = $row->model_id;
+                    $vehicle->save(); 
+                }
+
+                $this->year = $year;
+                $this->make = $row->make;
+                $this->model = $row->model;
+                $this->model_id = $row->model_id;
+                $this->emit('updateVehicleId', $this->model_id);
+            }
+            $return[] = $vehicleMake;
+        }
+        return $return;
+    }
+
+    public function makeExists($year, $make)
+    {
+        return DB::table('tbl_models')
+            ->where('model_make_display', $make)
+            ->where([
+                ['model_sold_in_us', 1],
+                ['model_year', $year],
+                ['model_make_id', $make],
+            ])
+            ->select('model_make_display')
+            ->first()->model_make_display ?? false;
     }
 }

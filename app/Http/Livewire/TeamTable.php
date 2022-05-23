@@ -8,6 +8,7 @@ use Rappasoft\LaravelLivewireTables\Views\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Builder;
 use App\Models\User;
 use App\Models\Team;
+use \Carbon\Carbon;
 
 class TeamTable extends DataTableComponent
 {
@@ -26,7 +27,7 @@ class TeamTable extends DataTableComponent
         $this->setFilterLayoutSlideDown();
         $this->setPrimaryKey('id')
             ->setTableRowUrl(function($row) {
-                return route('accounts.show', $row);
+                return route('shops.show', $row);
             });
     }
 
@@ -116,19 +117,21 @@ class TeamTable extends DataTableComponent
                 ->deselected()
                 ->sortable()
                 ->searchable(),
-            Column::make("ROs", 'user_id as 2')
+            Column::make("RO's", 'user_id as 2')
                 //->sortable(),
                 ->format(fn($value, $row, Column $column) => $row->roCount()),
-            Column::make("Users", 'user_id')
+            Column::make("USERs", 'user_id')
                 //->sortable()
                 ->format(fn($value, $row, Column $column) => $row->userCount()),
             Column::make("Created at", "created_at")
                 ->sortable()
                 ->collapseOnMobile()
+                ->format(fn($value, $row, Column $column) => (Carbon::parse($value))->diffForHumans())
                 ->deselected(),
             Column::make("Updated at", "updated_at")
                 ->sortable()
                 ->collapseOnMobile()
+                ->format(fn($value, $row, Column $column) => (Carbon::parse($value))->diffForHumans())
                 ->deselected(),
         ];
     }

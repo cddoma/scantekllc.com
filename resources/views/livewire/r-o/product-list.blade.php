@@ -1,8 +1,8 @@
 
-<datalist id="adjusterOptions">
-    @if(!empty($adjusters))
-    @foreach($adjusters as $adjuster)
-        <option value="{{ $adjuster['name'] }}"/>
+<datalist id="productOptions">
+    @if(!empty($products))
+    @foreach($products as $product)
+        <option value="{{ $product['name'] }}" data-product-id="{{ $product['product_id'] data-price="{{ $product['price'] }}"/>
     @endforeach
     @endif
 </datalist>

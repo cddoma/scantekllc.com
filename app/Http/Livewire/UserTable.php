@@ -121,9 +121,6 @@ class UserTable extends DataTableComponent
                 ->searchable()
                 ->collapseOnMobile()
                 ->deselected(),
-            Column::make("Shop", "currentTeam.name")
-                ->sortable()
-                ->searchable(),
             ImageColumn::make('Photo', 'profile_photo_path')
                 ->location(
                     fn($row) => !empty($row->profile_photo_path) ? env('APP_URL_CDN').'/storage/'.$row->profile_photo_path : $row->profile_photo_url
@@ -134,12 +131,14 @@ class UserTable extends DataTableComponent
                     'alt' => $row->name,
                     'title' => '['.$row->{'currentTeam.name'} . '] ' . $row->name,
                 ])
-                ->collapseOnMobile()
-                ->deselected(),
+                ->collapseOnMobile(),
             Column::make("Name", "name")
                 ->sortable()
                 ->searchable()
                 ->format(fn($value, $row, Column $column) => (boolval($row->super_admin) ? '[ADMIN] ' : '') . $value),
+            Column::make("Shop", "currentTeam.name")
+                ->sortable()
+                ->searchable(),
             Column::make("Email", "email")
                 ->sortable()
                 ->searchable()
@@ -148,10 +147,12 @@ class UserTable extends DataTableComponent
             Column::make("Created at", "created_at")
                 ->sortable()
                 ->collapseOnMobile()
+                ->format(fn($value, $row, Column $column) => (Carbon::parse($value))->diffForHumans())
                 ->deselected(),
             Column::make("Updated at", "updated_at")
                 ->sortable()
                 ->collapseOnMobile()
+                ->format(fn($value, $row, Column $column) => (Carbon::parse($value))->diffForHumans())
                 ->deselected(),
             Column::make('Last Active', 'session.last_activity')
                 ->collapseOnMobile()

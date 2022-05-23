@@ -14,7 +14,7 @@ class DeleteTeam implements DeletesTeams
      */
     public function delete($team)
     {
-        $this->redirectTo = route('accounts.index');
+        $this->redirectTo = route('shops.index');
         $team->purge();
         
     }

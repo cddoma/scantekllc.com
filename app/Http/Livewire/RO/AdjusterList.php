@@ -4,7 +4,7 @@ namespace App\Http\Livewire\RO;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 use App\Models\Team;
-use App\Models\User;
+use App\Models\RepairOrder;
 
 class AdjusterList extends Component
 {
@@ -15,7 +15,7 @@ class AdjusterList extends Component
 
     public function update($team_id)
     {
-        $this->adjusters = User::where('current_team_id', $team_id)->select('name', 'id')->get()->toArray();
+        $this->adjusters = RepairOrder::where('team_id', $team_id)->distinct()->pluck('service_advisor')->toArray();
     }
 
     public function mount($team_id)
